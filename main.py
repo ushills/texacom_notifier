@@ -16,8 +16,13 @@
 # an alarm state
 
 # Personal variables
-webhook_key = "{IFTTT webhook key}"
-webhook_event = "alarm_activated"
-base_url = "https://maker.ifttt.com/use/"
-ssid = "{SSID name}"
-ssid_password = "{SSID password}"
+WEBHOOK_KEY = "{IFTTT webhook key}"
+WEBHOOK_EVENT = "alarm_activated"
+BASE_URL = "https://maker.ifttt.com"
+SSID = "{SSID name}"
+SSID_PASSWORD = "{SSID password}"
+
+
+def create_url(action):
+    url = BASE_URL + "/trigger/" + WEBHOOK_EVENT + "/with/key/" + WEBHOOK_KEY + "?value1=" + action
+    return url
