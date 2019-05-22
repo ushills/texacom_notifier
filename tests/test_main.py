@@ -16,7 +16,13 @@ mock_usocket = MagicMock()
 sys.modules["usocket"] = mock_usocket
 
 
-from main import create_url, check_intruder, check_second_intruder, check_set
+from main import (
+    create_url,
+    check_intruder,
+    check_second_intruder,
+    check_set,
+    send_webhook,
+)
 
 
 # patch global variables to isolate test case
@@ -87,3 +93,20 @@ class TestAlarmSignals:
         set_unset_signal.value.return_value = False
         set_state = True
         assert check_set(set_unset_signal, set_state) == "alarm unset"
+
+
+def fake_send_webhook(url):
+    full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(url).encode()
+    return full_url
+
+
+@patch("main.send_webhook", side_effect=fake_send_webhook)
+def test_send_webhook(send_webhook):
+    url = create_url("test action")
+    full_url = send_webhook(url)
+    assert type(full_url) == bytes
+    assert (
+        full_url
+        == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/alarm_activated/with/key/{IFTTT webhook key}?value1=test action\r\n\r\n"
+    )
+
