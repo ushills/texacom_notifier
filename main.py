@@ -15,31 +15,32 @@
 # Pins are high by default and therefore a value of 0 indicates
 # an alarm state
 
-# from machine import Pin, Signal
-# import network
+from machine import Pin, Signal
 
-# Global variables
+import network
+
+# global variables
 WEBHOOK_KEY = "{IFTTT webhook key}"
 WEBHOOK_EVENT = "alarm_activated"
 BASE_URL = "https://maker.ifttt.com"
 SSID = "{SSID name}"
 SSID_PASSWORD = "{SSID password}"
 
-# # define inputs
-# # INTRUDER_PIN = D1 (GPIO5)
-# INTRUDER_PIN = Pin(5, Pin.IN)
-# # SET_UNSET_PIN = D2 (GPIO4)
-# SET_UNSET_PIN = Pin(4, Pin.IN)
-# # SECOND_INTRUDER_PIN = D3 (GPIO0)
-# SECOND_INTRUDER_PIN = Pin(0, Pin.IN)
-# # esp LED
-# WIFI_LED_PIN = Pin(16, Pin.OUT)
+# define inputs
+# INTRUDER_PIN = D1 (GPIO5)
+INTRUDER_PIN = Pin(5, Pin.IN)
+# SET_UNSET_PIN = D2 (GPIO4)
+SET_UNSET_PIN = Pin(4, Pin.IN)
+# SECOND_INTRUDER_PIN = D3 (GPIO0)
+SECOND_INTRUDER_PIN = Pin(0, Pin.IN)
+# esp LED
+WIFI_LED_PIN = Pin(16, Pin.OUT)
 
 # # define signals
-# intruder_signal = Signal(INTRUDER_PIN, invert=True)
-# set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
-# second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
-# wifi_LED = Signal(WIFI_LED_PIN, invert=True)
+intruder_signal = Signal(INTRUDER_PIN, invert=True)
+set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
+second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
+wifi_LED = Signal(WIFI_LED_PIN, invert=True)
 
 
 def create_url(action):
@@ -84,21 +85,16 @@ def check_wifi_connected():
         wifi_LED.off()
 
 
-# def network_connect():
-#     wlan = network.WLAN(network.STA_IF)
-#         wlan.active(True)
-#         if not wlan.isconnected():
-#             print('connecting to network...')
-#             wlan.connect('essid', 'password')
-#             while not wlan.isconnected():
-#                 pass
-#         # turn wifi_LED on when connected
-#         wifi_LED.on()
-
-
-def create_webhook(signal):
-    webhook = base_url + webhook_key + "/" + webhook_event + "?value1=" + signal
-    return webhook
+def wifi_connect():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    if not wlan.isconnected():
+        print("connecting to network...")
+        wlan.connect("SSID", "SSIDPASSWORD")
+        while not wlan.isconnected():
+            pass
+    print("network config:", wlan.ifconfig())
+    wifi_LED.on()
 
 
 def send_webhook(webhook):

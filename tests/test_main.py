@@ -1,19 +1,33 @@
 from unittest.mock import Mock, patch
 from unittest.mock import MagicMock
+import sys
+
+
+# mock modules from Micropython and not installed
+mock_machine = MagicMock()
+sys.modules["machine"] = mock_machine
+mock_network = MagicMock()
+sys.modules["network"] = mock_network
+from machine import Signal
+from machine import Pin
+import network
+
+# import funtions to be tested
 from main import create_url, check_intruder, check_second_intruder, check_set
 
 
+# patch global variables to isolate test case
 @patch("main.WEBHOOK_KEY", "testWebhookKey")
 @patch("main.WEBHOOK_EVENT", "testWebhookEvent")
 def test_create_url():
-    action = "alarmunset"
+    action = "alarm unset"
     assert (
         create_url(action)
-        == "https://maker.ifttt.com/trigger/testWebhookEvent/with/key/testWebhookKey?value1=alarmunset"
+        == "https://maker.ifttt.com/trigger/testWebhookEvent/with/key/testWebhookKey?value1=alarm unset"
     )
 
 
-# Test alarm signals
+# test alarm signals
 def test_alarm_signal_and_alarm_state_false():
     intruder_signal = MagicMock()
     intruder_signal.value.return_value = True
@@ -24,6 +38,20 @@ def test_alarm_signal_and_alarm_state_false():
 def test_alarm_signal_and_alarm_state_true():
     intruder_signal = MagicMock()
     intruder_signal.value.return_value = True
+    alarm_state = True
+    assert check_intruder(intruder_signal, alarm_state) is None
+
+
+def test_no_alarm_signal_and_alarm_state_false():
+    intruder_signal = MagicMock()
+    intruder_signal.value.return_value = False
+    alarm_state = False
+    assert check_intruder(intruder_signal, alarm_state) is None
+
+
+def test_no_alarm_signal_and_alarm_state_true():
+    intruder_signal = MagicMock()
+    intruder_signal.value.return_value = False
     alarm_state = True
     assert check_intruder(intruder_signal, alarm_state) is None
 
