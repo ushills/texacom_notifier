@@ -16,8 +16,8 @@
 # an alarm state
 
 from machine import Pin, Signal
-
 import network
+import usocket as socket
 
 # global variables
 WEBHOOK_KEY = "{IFTTT webhook key}"
@@ -97,8 +97,15 @@ def wifi_connect():
     wifi_LED.on()
 
 
-def send_webhook(webhook):
-    pass
+def send_webhook(url):
+    full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(url).encode()
+    addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
+    s = socket.socket()
+    s.connect(addr)
+    s.send(full_url)
+    # may not need to receive data, check if webhook works without and delete
+    data = s.recv(1000)
+    s.close()
 
 
 if __name__ == "__main__":
