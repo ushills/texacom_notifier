@@ -1,3 +1,4 @@
+import pytest
 from unittest.mock import patch
 from unittest.mock import MagicMock, Mock
 import sys
@@ -36,62 +37,71 @@ def test_create_url():
     )
 
 
-class TestAlarmSignals:
-    # test alarm signals
-    def test_alarm_signal_and_alarm_state_false(self):
-        intruder_signal = Mock(spec=["value"])
-        intruder_signal.value.return_value = True
-        alarm_state = False
-        assert check_intruder(intruder_signal, alarm_state) == "alarm activated"
+@pytest.fixture(scope="session")
+def intruder_signal_true():
+    intruder_signal = Mock(spec=["value"])
+    intruder_signal.value.return_value = True
+    return intruder_signal
 
-    def test_alarm_signal_and_alarm_state_true(self):
-        intruder_signal = Mock(spec=["value"])
-        intruder_signal.value.return_value = True
-        alarm_state = True
-        assert check_intruder(intruder_signal, alarm_state) is None
 
-    def test_no_alarm_signal_and_alarm_state_false(self):
-        intruder_signal = Mock(spec=["value"])
-        intruder_signal.value.return_value = False
-        alarm_state = False
-        assert check_intruder(intruder_signal, alarm_state) is None
+# test alarm signals
+def test_alarm_signal_and_alarm_state_false(intruder_signal_true):
+    alarm_state = False
+    assert check_intruder(intruder_signal_true, alarm_state) == "alarm activated"
 
-    def test_no_alarm_signal_and_alarm_state_true(self):
-        intruder_signal = Mock(spec=["value"])
-        intruder_signal.value.return_value = False
-        alarm_state = True
-        assert check_intruder(intruder_signal, alarm_state) is None
 
-    # test second intruder signals
-    def test_second_intruder_and_second_intruder_state_false(self):
-        second_intruder_signal = Mock(spec=["value"])
-        second_intruder_signal.value.return_value = True
-        second_intruder_state = False
-        assert (
-            check_second_intruder(second_intruder_signal, second_intruder_state)
-            == "second intruder detected"
-        )
+def test_alarm_signal_and_alarm_state_true():
+    intruder_signal = Mock(spec=["value"])
+    intruder_signal.value.return_value = True
+    alarm_state = True
+    assert check_intruder(intruder_signal, alarm_state) is None
 
-    def test_second_intruder_and_second_intruder_state_true(self):
-        second_intruder_signal = Mock(spec=["value"])
-        second_intruder_signal.value.return_value = True
-        second_intruder_state = True
-        assert (
-            check_second_intruder(second_intruder_signal, second_intruder_state) is None
-        )
 
-    # test set/unset signals
-    def test_set_unset_signal_and_set_state_true(self):
-        set_unset_signal = MagicMock()
-        set_unset_signal.value.return_value = True
-        set_state = False
-        assert check_set(set_unset_signal, set_state) == "alarm set"
+def test_no_alarm_signal_and_alarm_state_false():
+    intruder_signal = Mock(spec=["value"])
+    intruder_signal.value.return_value = False
+    alarm_state = False
+    assert check_intruder(intruder_signal, alarm_state) is None
 
-    def test_set_unset_signal_and_set_state_false(self):
-        set_unset_signal = MagicMock()
-        set_unset_signal.value.return_value = False
-        set_state = True
-        assert check_set(set_unset_signal, set_state) == "alarm unset"
+
+def test_no_alarm_signal_and_alarm_state_true():
+    intruder_signal = Mock(spec=["value"])
+    intruder_signal.value.return_value = False
+    alarm_state = True
+    assert check_intruder(intruder_signal, alarm_state) is None
+
+
+# test second intruder signals
+def test_second_intruder_and_second_intruder_state_false():
+    second_intruder_signal = Mock(spec=["value"])
+    second_intruder_signal.value.return_value = True
+    second_intruder_state = False
+    assert (
+        check_second_intruder(second_intruder_signal, second_intruder_state)
+        == "second intruder detected"
+    )
+
+
+def test_second_intruder_and_second_intruder_state_true():
+    second_intruder_signal = Mock(spec=["value"])
+    second_intruder_signal.value.return_value = True
+    second_intruder_state = True
+    assert check_second_intruder(second_intruder_signal, second_intruder_state) is None
+
+
+# test set/unset signals
+def test_set_unset_signal_and_set_state_true():
+    set_unset_signal = MagicMock()
+    set_unset_signal.value.return_value = True
+    set_state = False
+    assert check_set(set_unset_signal, set_state) == "alarm set"
+
+
+def test_set_unset_signal_and_set_state_false():
+    set_unset_signal = MagicMock()
+    set_unset_signal.value.return_value = False
+    set_state = True
+    assert check_set(set_unset_signal, set_state) == "alarm unset"
 
 
 def fake_send_webhook(url):
