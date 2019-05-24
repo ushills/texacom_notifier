@@ -37,10 +37,17 @@ def test_create_url():
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def intruder_signal_true():
     intruder_signal = Mock(spec=["value"])
     intruder_signal.value.return_value = True
+    return intruder_signal
+
+
+@pytest.fixture()
+def intruder_signal_false():
+    intruder_signal = Mock(spec=["value"])
+    intruder_signal.value.return_value = False
     return intruder_signal
 
 
@@ -50,43 +57,52 @@ def test_alarm_signal_and_alarm_state_false(intruder_signal_true):
     assert check_intruder(intruder_signal_true, alarm_state) == "alarm activated"
 
 
-def test_alarm_signal_and_alarm_state_true():
-    intruder_signal = Mock(spec=["value"])
-    intruder_signal.value.return_value = True
+def test_alarm_signal_and_alarm_state_true(intruder_signal_false):
     alarm_state = True
-    assert check_intruder(intruder_signal, alarm_state) is None
+    assert check_intruder(intruder_signal_false, alarm_state) is None
 
 
-def test_no_alarm_signal_and_alarm_state_false():
-    intruder_signal = Mock(spec=["value"])
-    intruder_signal.value.return_value = False
+def test_no_alarm_signal_and_alarm_state_false(intruder_signal_false):
     alarm_state = False
-    assert check_intruder(intruder_signal, alarm_state) is None
+    assert check_intruder(intruder_signal_false, alarm_state) is None
 
 
-def test_no_alarm_signal_and_alarm_state_true():
-    intruder_signal = Mock(spec=["value"])
-    intruder_signal.value.return_value = False
+def test_no_alarm_signal_and_alarm_state_true(intruder_signal_false):
     alarm_state = True
-    assert check_intruder(intruder_signal, alarm_state) is None
+    assert check_intruder(intruder_signal_false, alarm_state) is None
 
 
 # test second intruder signals
-def test_second_intruder_and_second_intruder_state_false():
-    second_intruder_signal = Mock(spec=["value"])
-    second_intruder_signal.value.return_value = True
+
+
+@pytest.fixture()
+def second_intruder_signal_true():
+    second_signal = Mock(spec=["value"])
+    second_signal.value.return_value = True
+    return second_signal
+
+
+@pytest.fixture()
+def second_intruder_signal_false():
+    second_signal = Mock(spec=["value"])
+    second_signal.value.return_value = False
+    return second_signal
+
+
+def test_second_intruder_and_second_intruder_state_false(second_intruder_signal_true):
     second_intruder_state = False
     assert (
-        check_second_intruder(second_intruder_signal, second_intruder_state)
+        check_second_intruder(second_intruder_signal_true, second_intruder_state)
         == "second intruder detected"
     )
 
 
-def test_second_intruder_and_second_intruder_state_true():
-    second_intruder_signal = Mock(spec=["value"])
-    second_intruder_signal.value.return_value = True
+def test_second_intruder_and_second_intruder_state_true(second_intruder_signal_true):
     second_intruder_state = True
-    assert check_second_intruder(second_intruder_signal, second_intruder_state) is None
+    assert (
+        check_second_intruder(second_intruder_signal_true, second_intruder_state)
+        is None
+    )
 
 
 # test set/unset signals
