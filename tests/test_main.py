@@ -63,21 +63,22 @@ def test_second_intruder_and_second_intruder_state_true():
     assert check_second_intruder(True, True) is None
 
 
-# test set/unset signals
-def test_set_unset_signal_and_set_state_true():
-    assert check_set(True, True) == None
+# test set signals
+def test_set_signal_and_set_state_true():
+    assert check_set(True, True) is None
 
 
-def test_set_unset_signal_and_set_state_false():
+def test_set_signal_and_set_state_false():
     assert check_set(True, False) == "alarm set"
 
 
-def test_unset_signal_and_set_state_false():
+# test unset signals
+def test_unset_signal_and_set_state_true():
     assert check_set(False, True) == "alarm unset"
 
 
 def test_unset_signal_and_set_state_false():
-    assert check_set(False, False) == None
+    assert check_set(False, False) is None
 
 
 # check webook send functions
