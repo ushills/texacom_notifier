@@ -72,10 +72,11 @@ def check_second_intruder(second_intruder_signal_value, second_intruder_state):
 def check_set(set_unset_signal_value, set_state):
     if set_unset_signal_value is True and set_state is False:
         value1 = "alarm set"
-        return value1
     elif set_unset_signal_value is False and set_state is True:
         value1 = "alarm unset"
-        return value1
+    else:
+        value1 = None
+    return value1
 
 
 def check_wifi_connected():
