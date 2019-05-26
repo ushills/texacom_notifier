@@ -110,16 +110,32 @@ def send_webhook(url):
     # may not need to receive data, check if webhook works without and delete
     data = s.recv(1000)
     s.close()
+    return True
 
 
 def poll_alarm_signal(intruder_signal_value, alarm_state):
+    sent_webhook = None
     value1 = check_intruder(intruder_signal_value, alarm_state)
     if value1 == "alarm activated":
         url = create_url(value1)
+        sent_webhook = send_webhook(url)
         alarm_state = True
     elif value1 == "alarm stopped":
         alarm_state = False
-    return alarm_state
+    return alarm_state, sent_webhook
+
+
+def poll_set_signal(set_unset_signal_value, set_state):
+    value1 = check_set(set_unset_signal_value, set_state)
+    sent_webhook = None
+    if value1 == "alarm set":
+        url = create_url(value1)
+        sent_webhook = send_webhook(url)
+        set_state = True
+    elif value1 == "alarm unset":
+        url = create_url(value1)
+        set_state = False
+    return set_state, sent_webhook
 
 
 if __name__ == "__main__":

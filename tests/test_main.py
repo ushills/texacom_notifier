@@ -24,6 +24,7 @@ from main import (
     check_set,
     send_webhook,
     poll_alarm_signal,
+    poll_set_signal,
 )
 
 
@@ -109,16 +110,34 @@ def test_send_webhook(send_webhook):
 
 
 # functional tests
-
-
 @patch("main.send_webhook", side_effect=fake_send_webhook)
 def test_poll_alarm_signal(send_webhook):
     alarm_state = False
-    alarm_state = poll_alarm_signal(True, alarm_state)
+    # send alarm activated signal, webhook should be sent and alarm state changed to True
+    alarm_state, sent_webhook = poll_alarm_signal(True, alarm_state)
     assert alarm_state is True
-    alarm_state = poll_alarm_signal(True, alarm_state)
+    assert (
+        sent_webhook
+        == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/alarm_activated/with/key/{IFTTT webhook key}?value1=alarm activated\r\n\r\n"
+    )
+    # alarm state should now be set to True and no webhook sent
+    alarm_state, sent_webook = poll_alarm_signal(True, alarm_state)
     assert alarm_state is True
-    alarm_state = poll_alarm_signal(False, alarm_state)
+    assert sent_webook is None
+    # alarm state should change to False and no webhook sent
+    alarm_state, sent_webook = poll_alarm_signal(False, alarm_state)
     assert alarm_state is False
-    alarm_state = poll_alarm_signal(False, alarm_state)
-    assert alarm_state is False
+    assert sent_webook is None
+
+
+# @patch("main.send_webhook", side_effect=fake_send_webhook)
+# def test_poll_set_signal(send_webhook):
+#     set_state = False
+#     set_state = poll_set_signal(True, set_state)
+#     assert set_state is True
+#     set_state = poll_set_signal(True, set_state)
+#     assert set_state is True
+#     set_state = poll_set_signal(False, set_state)
+#     assert set_state is False
+#     set_state = poll_set_signal(False, set_state)
+#     assert set_state is False
