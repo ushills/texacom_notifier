@@ -134,6 +134,7 @@ def poll_set_signal(set_unset_signal_value, set_state):
         set_state = True
     elif value1 == "alarm unset":
         url = create_url(value1)
+        sent_webhook = send_webhook(url)
         set_state = False
     return set_state, sent_webhook
 
