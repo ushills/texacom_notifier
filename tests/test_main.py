@@ -23,6 +23,7 @@ from main import (
     check_second_intruder,
     check_set,
     send_webhook,
+    poll_alarm_signal,
 )
 
 
@@ -51,7 +52,7 @@ def test_no_alarm_signal_and_alarm_state_false():
 
 
 def test_no_alarm_signal_and_alarm_state_true():
-    assert check_intruder(False, True) is None
+    assert check_intruder(False, True) == "alarm stopped"
 
 
 # test second intruder signals
@@ -61,6 +62,14 @@ def test_second_intruder_and_second_intruder_state_false():
 
 def test_second_intruder_and_second_intruder_state_true():
     assert check_second_intruder(True, True) is None
+
+
+def test_no_second_intruder_and_second_intruder_state_true():
+    assert check_second_intruder(False, True) is None
+
+
+def test_no_second_intruder_and_second_intruder_state_false():
+    assert check_second_intruder(False, False) is None
 
 
 # test set signals
@@ -84,6 +93,7 @@ def test_unset_signal_and_set_state_false():
 # check webook send functions
 def fake_send_webhook(url):
     full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(url).encode()
+    print("webhook sent\n{}".format(full_url))
     return full_url
 
 
@@ -97,3 +107,18 @@ def test_send_webhook(send_webhook):
         == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/alarm_activated/with/key/{IFTTT webhook key}?value1=test action\r\n\r\n"
     )
 
+
+# functional tests
+
+
+@patch("main.send_webhook", side_effect=fake_send_webhook)
+def test_poll_alarm_signal(send_webhook):
+    alarm_state = False
+    alarm_state = poll_alarm_signal(True, alarm_state)
+    assert alarm_state is True
+    alarm_state = poll_alarm_signal(True, alarm_state)
+    assert alarm_state is True
+    alarm_state = poll_alarm_signal(False, alarm_state)
+    assert alarm_state is False
+    alarm_state = poll_alarm_signal(False, alarm_state)
+    assert alarm_state is False

@@ -41,6 +41,7 @@ intruder_signal = Signal(INTRUDER_PIN, invert=True)
 set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 wifi_LED = Signal(WIFI_LED_PIN, invert=True)
+alarm_state = None
 
 
 def create_url(action):
@@ -60,7 +61,11 @@ def create_url(action):
 def check_intruder(intruder_signal_value, alarm_state):
     if intruder_signal_value is True and alarm_state is False:
         value1 = "alarm activated"
-        return value1
+    elif intruder_signal_value is False and alarm_state is True:
+        value1 = "alarm stopped"
+    else:
+        value1 = None
+    return value1
 
 
 def check_second_intruder(second_intruder_signal_value, second_intruder_state):
@@ -107,5 +112,18 @@ def send_webhook(url):
     s.close()
 
 
+def poll_alarm_signal(intruder_signal_value, alarm_state):
+    value1 = check_intruder(intruder_signal_value, alarm_state)
+    if value1 == "alarm activated":
+        url = create_url(value1)
+        alarm_state = True
+    elif value1 == "alarm stopped":
+        alarm_state = False
+    return alarm_state
+
+
 if __name__ == "__main__":
+    if intruder_signal.value() != intruder_signal_value:
+        intruder_signal_value = intruder_signal.value()
+        alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)
     pass
