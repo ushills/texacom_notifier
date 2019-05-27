@@ -40,58 +40,31 @@ def test_create_url():
 
 
 # test alarm signals
-def test_alarm_signal_and_alarm_state_false():
+def test_check_intruder():
     assert check_intruder(True, False) == "alarm activated"
-
-
-def test_alarm_signal_and_alarm_state_true():
     assert check_intruder(True, True) is None
-
-
-def test_no_alarm_signal_and_alarm_state_false():
     assert check_intruder(False, False) is None
-
-
-def test_no_alarm_signal_and_alarm_state_true():
     assert check_intruder(False, True) == "alarm stopped"
 
 
 # test second intruder signals
-def test_second_intruder_and_second_intruder_state_false():
+def test_check_second_intruder_and_second_intruder_state_false():
     assert check_second_intruder(True, False) == "second intruder detected"
-
-
-def test_second_intruder_and_second_intruder_state_true():
     assert check_second_intruder(True, True) is None
-
-
-def test_no_second_intruder_and_second_intruder_state_true():
     assert check_second_intruder(False, True) is None
-
-
-def test_no_second_intruder_and_second_intruder_state_false():
     assert check_second_intruder(False, False) is None
 
 
 # test set signals
-def test_set_signal_and_set_state_true():
+def test_check_set():
     assert check_set(True, True) is None
-
-
-def test_set_signal_and_set_state_false():
     assert check_set(True, False) == "alarm set"
-
-
-# test unset signals
-def test_unset_signal_and_set_state_true():
     assert check_set(False, True) == "alarm unset"
-
-
-def test_unset_signal_and_set_state_false():
     assert check_set(False, False) is None
 
 
 # check webook send functions
+# mock send_webhook
 def fake_send_webhook(url):
     full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(url).encode()
     print("webhook sent\n{}".format(full_url))
@@ -148,9 +121,9 @@ def test_poll_set_signal(send_webhook):
     set_state, sent_webook = poll_set_signal(False, set_state)
     assert set_state is False
     assert (
-    sent_webook
-    == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/alarm_activated/with/key/{IFTTT webhook key}?value1=alarm unset\r\n\r\n"
-)
+        sent_webook
+        == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/alarm_activated/with/key/{IFTTT webhook key}?value1=alarm unset\r\n\r\n"
+    )
     # alarm unset signal maintained, set state remains False and no webhook sent
     set_state, sent_webook = poll_set_signal(False, set_state)
     assert set_state is False
