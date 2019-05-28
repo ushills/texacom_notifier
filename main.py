@@ -41,6 +41,7 @@ intruder_signal = Signal(INTRUDER_PIN, invert=True)
 set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 wifi_LED = Signal(WIFI_LED_PIN, invert=True)
+alarm_state = None
 
 
 def create_url(action):
@@ -57,27 +58,34 @@ def create_url(action):
 
 
 # actions
-def check_intruder(intruder_signal, alarm_state):
-    if intruder_signal.value() is True and alarm_state is False:
-        signal = "alarm activated"
-        # send_webhook(signal)
-        return signal
+def check_intruder(intruder_signal_value, alarm_state):
+    if intruder_signal_value is True and alarm_state is False:
+        value1 = "alarm activated"
+    elif intruder_signal_value is False and alarm_state is True:
+        value1 = "alarm stopped"
+    else:
+        value1 = None
+    return value1
 
 
-def check_second_intruder(second_intruder_signal, second_intruder_state):
-    if second_intruder_signal.value() is True and second_intruder_state is False:
-        signal = "second intruder detected"
-        return signal
+def check_second_intruder(second_intruder_signal_value, second_intruder_state):
+    if second_intruder_signal_value is True and second_intruder_state is False:
+        value1 = "second intruder detected"
+    elif second_intruder_signal_value is False and second_intruder_state is True:
+        value1 = "second intruder cleared"
+    else:
+        value1 = None
+    return value1
 
 
-def check_set(set_unset_signal, set_state):
-    if set_unset_signal.value() is True and set_state is False:
-        signal = "alarm set"
-        send_webhook(signal)
-        return signal
-    elif set_unset_signal.value() is False and set_state is True:
-        signal = "alarm unset"
-        return signal
+def check_set(set_unset_signal_value, set_state):
+    if set_unset_signal_value is True and set_state is False:
+        value1 = "alarm set"
+    elif set_unset_signal_value is False and set_state is True:
+        value1 = "alarm unset"
+    else:
+        value1 = None
+    return value1
 
 
 def check_wifi_connected():
@@ -106,7 +114,49 @@ def send_webhook(url):
     # may not need to receive data, check if webhook works without and delete
     data = s.recv(1000)
     s.close()
+    return True
+
+
+def poll_alarm_signal(intruder_signal_value, alarm_state):
+    sent_webhook = None
+    value1 = check_intruder(intruder_signal_value, alarm_state)
+    if value1 == "alarm activated":
+        url = create_url(value1)
+        sent_webhook = send_webhook(url)
+        alarm_state = True
+    elif value1 == "alarm stopped":
+        alarm_state = False
+    return alarm_state, sent_webhook
+
+
+def poll_set_signal(set_unset_signal_value, set_state):
+    value1 = check_set(set_unset_signal_value, set_state)
+    sent_webhook = None
+    if value1 == "alarm set":
+        url = create_url(value1)
+        sent_webhook = send_webhook(url)
+        set_state = True
+    elif value1 == "alarm unset":
+        url = create_url(value1)
+        sent_webhook = send_webhook(url)
+        set_state = False
+    return set_state, sent_webhook
+
+
+def poll_second_intruder_signal(second_intruder_signal_value, second_intruder_state):
+    value1 = check_second_intruder(second_intruder_signal_value, second_intruder_state)
+    sent_webhook = None
+    if value1 == "second intruder detected":
+        url = create_url(value1)
+        sent_webhook = send_webhook(url)
+        second_intruder_state = True
+    elif value1 == "second intruder cleared":
+        second_intruder_state = False
+    return second_intruder_state, sent_webhook
 
 
 if __name__ == "__main__":
+    if intruder_signal.value() != intruder_signal_value:
+        intruder_signal_value = intruder_signal.value()
+        alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)
     pass
