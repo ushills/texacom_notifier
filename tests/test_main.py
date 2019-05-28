@@ -52,7 +52,7 @@ def test_check_intruder():
 def test_check_second_intruder_and_second_intruder_state_false():
     assert check_second_intruder(True, False) == "second intruder detected"
     assert check_second_intruder(True, True) is None
-    assert check_second_intruder(False, True) is None
+    assert check_second_intruder(False, True) == "second intruder cleared"
     assert check_second_intruder(False, False) is None
 
 
@@ -149,13 +149,15 @@ def test_poll_second_intruder_signal(send_webhook):
     )
     assert second_intruder_state is True
     assert sent_webook is None
-    # # clear second intruder signal, second intruder state changes to False and no webhook sent
-    # second_intruder_state, sent_webook = poll_second_intruder_signal(
-    #     False, second_intruder_state
-    # )
-    # assert second_intruder_state is False
-    # assert sent_webook is None
-    # # alarm unset signal maintained, set state remains False and no webhook sent
-    # set_state, sent_webook = poll_set_signal(False, set_state)
-    # assert set_state is False
-    # assert sent_webook is None
+    # clear second intruder signal, second intruder state changes to False and no webhook sent
+    second_intruder_state, sent_webook = poll_second_intruder_signal(
+        False, second_intruder_state
+    )
+    assert second_intruder_state is False
+    assert sent_webook is None
+    # alarm unset signal maintained, set state remains False and no webhook sent
+    second_intruder_state, sent_webook = poll_second_intruder_signal(
+        False, second_intruder_state
+    )
+    assert second_intruder_state is False
+    assert sent_webook is None
