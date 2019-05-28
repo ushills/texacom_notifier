@@ -71,7 +71,9 @@ def check_intruder(intruder_signal_value, alarm_state):
 def check_second_intruder(second_intruder_signal_value, second_intruder_state):
     if second_intruder_signal_value is True and second_intruder_state is False:
         value1 = "second intruder detected"
-        return value1
+    else:
+        value1 = None
+    return value1
 
 
 def check_set(set_unset_signal_value, set_state):
@@ -137,6 +139,18 @@ def poll_set_signal(set_unset_signal_value, set_state):
         sent_webhook = send_webhook(url)
         set_state = False
     return set_state, sent_webhook
+
+
+def poll_second_intruder_signal(second_intruder_signal_value, second_intruder_state):
+    value1 = check_second_intruder(second_intruder_signal_value, second_intruder_state)
+    sent_webhook = None
+    if value1 == "second intruder detected":
+        url = create_url(value1)
+        sent_webhook = send_webhook(url)
+        second_intruder_state = True
+    elif value1 is None:
+        second_intruder_state = False
+    return second_intruder_state, sent_webhook
 
 
 if __name__ == "__main__":

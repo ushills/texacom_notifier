@@ -25,6 +25,7 @@ from main import (
     send_webhook,
     poll_alarm_signal,
     poll_set_signal,
+    poll_second_intruder_signal,
 )
 
 
@@ -128,3 +129,33 @@ def test_poll_set_signal(send_webhook):
     set_state, sent_webook = poll_set_signal(False, set_state)
     assert set_state is False
     assert sent_webook is None
+
+
+@patch("main.send_webhook", side_effect=fake_send_webhook)
+def test_poll_second_intruder_signal(send_webhook):
+    second_intruder_state = False
+    # send second intruder signal, second_intruder_state changes to True and webhook sent
+    second_intruder_state, sent_webook = poll_second_intruder_signal(
+        True, second_intruder_state
+    )
+    assert second_intruder_state is True
+    assert (
+        sent_webook
+        == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/alarm_activated/with/key/{IFTTT webhook key}?value1=second intruder detected\r\n\r\n"
+    )
+    # second intruder signal maintained, second intruder state remains True and no webhook sent
+    second_intruder_state, sent_webook = poll_second_intruder_signal(
+        True, second_intruder_state
+    )
+    assert second_intruder_state is True
+    assert sent_webook is None
+    # # clear second intruder signal, second intruder state changes to False and no webhook sent
+    # second_intruder_state, sent_webook = poll_second_intruder_signal(
+    #     False, second_intruder_state
+    # )
+    # assert second_intruder_state is False
+    # assert sent_webook is None
+    # # alarm unset signal maintained, set state remains False and no webhook sent
+    # set_state, sent_webook = poll_set_signal(False, set_state)
+    # assert set_state is False
+    # assert sent_webook is None
