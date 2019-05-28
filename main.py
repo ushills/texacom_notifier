@@ -155,8 +155,21 @@ def poll_second_intruder_signal(second_intruder_signal_value, second_intruder_st
     return second_intruder_state, sent_webhook
 
 
-if __name__ == "__main__":
+def poll_all_signals():
     if intruder_signal.value() != intruder_signal_value:
         intruder_signal_value = intruder_signal.value()
-        alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)
+        # as poll_* returns both state and sent_webhook value just take the first element [0]
+        alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)[0]
+    if set_unset_signal.value() != set_unset_signal_value:
+        set_unset_signal_value = set_unset_signal.value()
+        set_state = poll_set_signal(set_unset_signal_value, set_state)[0]
+    if second_intruder_signal_value != second_intruder_signal.value():
+        second_intruder_signal_value = second_intruder_signal.value()
+        second_intruder_state = poll_second_intruder_signal(
+            second_intruder_signal_value, second_intruder_state
+        )[0]
+
+
+if __name__ == "__main__":
+    poll_all_signals()
     pass
