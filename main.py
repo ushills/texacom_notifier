@@ -46,6 +46,31 @@ set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 
+class Output:
+    def __init__(self):
+        self.output_is_active = False
+        self.command1 = None
+        self.command2 = None
+
+    def check_output(self, output_value):
+        update_output = output_value != self.output_is_active
+        if update_output:
+            if output_value is True:
+                self.trigger_command()
+            else:
+                self.cease_command()
+        self.output_is_active = output_value
+
+    def trigger_command(self):
+        print("{} triggered".format(self.command1))
+
+    def cease_command(self):
+        if self.command2 is not None:
+            print("{} triggered".format(self.command2))
+        else:
+            print("{} ceased".format(self.command1))
+
+
 def create_url(action):
     url = (
         BASE_URL
@@ -57,8 +82,6 @@ def create_url(action):
         + action
     )
     return url
-
-
 
 
 def wifi_connected():
