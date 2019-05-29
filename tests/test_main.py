@@ -64,12 +64,14 @@ def output_manager():
 @pytest.fixture(scope="class")
 def output_manager_trigger_method():
     OutputManager = Mock()
+    OutputManager.trigger_command()
     return OutputManager.trigger_command
 
 
 @pytest.fixture(scope="class")
 def output_manager_cease_method():
     OutputManager = Mock()
+    OutputManager.cease_command
     return OutputManager.cease_command
 
 
@@ -80,6 +82,7 @@ def test_Output_init():
     assert test_alarm.command2 is None
 
 
+@patch.object("main.OutputManager", "trigger_command")
 class TestDoNotTriggerOutput:
     @pytest.fixture(scope="class", autouse=True)
     def handle_false_output_value(self, output_manager):
@@ -88,42 +91,59 @@ class TestDoNotTriggerOutput:
     def test_output_is_not_active(self, output_manager):
         assert not output_manager.output_is_active
 
-    def test_trigger_command_is_not_called(self, output_manager_trigger_method):
-        assert output_manager_trigger_method.assert_not_called
+    def test_trigger_command_is_not_called(self, trigger_command):
+        # assert len(output_manager_trigger_method.mock_calls) == 0
+        assert output_manager_trigger_method.called == ""
 
     def test_cease_command_is_not_called(self, output_manager_cease_method):
-        assert output_manager_cease_method.assert_not_called
+        assert output_manager_cease_method.assert_called
 
 
-class TestTriggerOutput:
-    @pytest.fixture(scope="class", autouse=True)
-    def handle_true_output_value(self, output_manager):
-        output_manager.check_output(True)
+# class TestTriggerOutput:
+#     @pytest.fixture(scope="class", autouse=True)
+#     def handle_true_output_value(self, output_manager):
+#         output_manager.check_output(True)
 
-    def test_output_is_active(self, output_manager):
-        assert output_manager.output_is_active
+#     def test_output_is_active(self, output_manager):
+#         assert output_manager.output_is_active
 
-    def test_trigger_command_is_called(self, output_manager_trigger_method):
-        assert output_manager_trigger_method.assert_called_once
+#     def test_trigger_command_is_called(self, output_manager_trigger_method):
+#         assert len(output_manager_trigger_method.mock_calls) == 1
 
-    def test_cease_command_is_not_called(self, output_manager_cease_method):
-        assert output_manager_cease_method.assert_not_called
+#     def test_cease_command_is_not_called(self, output_manager_cease_method):
+#         assert len(output_manager_cease_method.mock_calls) == 0
 
 
-class TestTriggerOutputOnceRunsOnce:
-    @pytest.fixture(scope="class", autouse=True)
-    def handle_multiple_true_output_values(self, output_manager):
-        output_manager.check_output(True)
-        output_manager.check_output(True)
+# class TestTriggerOutputOnceRunsOnce:
+#     @pytest.fixture(scope="class", autouse=True)
+#     def handle_multiple_true_output_values(self, output_manager):
+#         output_manager.check_output(True)
+#         output_manager.check_output(True)
 
-    def test_output_is_active(self, output_manager):
-        assert output_manager.output_is_active
+#     def test_output_is_active(self, output_manager):
+#         assert output_manager.output_is_active
 
-    def test_trigger_command_is_called_only_once(self, output_manager_trigger_method):
-        assert output_manager_trigger_method.assert_called_once
+#     def test_trigger_command_is_called_only_once(self, output_manager_trigger_method):
+#         assert len(output_manager_trigger_method.mock_calls) == 1
 
-    def test_cease_command_is_not_called(self, output_manager_cease_method):
-        assert output_manager_cease_method.assert_not_called
+#     def test_cease_command_is_not_called(self, output_manager_cease_method):
+#         assert len(output_manager_cease_method.mock_calls) == 0
+
+
+# class TestCeaseMethodCalledWhenTriggerStops:
+#     @pytest.fixture(scope="class", autouse=True)
+#     def handle_multiple_true_then_false_output_values(self, output_manager):
+#         output_manager.check_output(True)
+#         output_manager.check_output(False)
+
+#     def test_output_is_active(self, output_manager):
+#         assert not output_manager.output_is_active
+
+#     def test_trigger_command_is_called_only_once(self, output_manager_trigger_method):
+#         assert len(output_manager_trigger_method.mock_calls) == 0
+
+#     def test_cease_command_is_called(self, output_manager_cease_method):
+#         assert len(output_manager_cease_method.mock_calls) == 0
 
 
 # @patch("main.Output.trigger_command", side_effect=fake_Output_trigger_command)
