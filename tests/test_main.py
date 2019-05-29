@@ -52,8 +52,8 @@ def test_send_webhook(send_webhook):
 
 # test Output signals
 # mock Output.trigger_command function for test
-def fake_Output_trigger_command():
-    return "output triggered"
+# def fake_Output_trigger_command():
+#     return "output triggered"
 
 
 @pytest.fixture(scope="class")
@@ -104,6 +104,22 @@ class TestTriggerOutput:
         assert output_manager.output_is_active
 
     def test_trigger_command_is_called(self, output_manager_trigger_method):
+        assert output_manager_trigger_method.assert_called_once
+
+    def test_cease_command_is_not_called(self, output_manager_cease_method):
+        assert output_manager_cease_method.assert_not_called
+
+
+class TestTriggerOutputOnceRunsOnce:
+    @pytest.fixture(scope="class", autouse=True)
+    def handle_multiple_true_output_values(self, output_manager):
+        output_manager.check_output(True)
+        output_manager.check_output(True)
+
+    def test_output_is_active(self, output_manager):
+        assert output_manager.output_is_active
+
+    def test_trigger_command_is_called_only_once(self, output_manager_trigger_method):
         assert output_manager_trigger_method.assert_called_once
 
     def test_cease_command_is_not_called(self, output_manager_cease_method):
