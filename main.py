@@ -59,35 +59,6 @@ def create_url(action):
     return url
 
 
-# actions
-def check_intruder(intruder_signal_value, alarm_state):
-    if intruder_signal_value is True and alarm_state is False:
-        value1 = "alarm activated"
-    elif intruder_signal_value is False and alarm_state is True:
-        value1 = "alarm stopped"
-    else:
-        value1 = None
-    return value1
-
-
-def check_second_intruder(second_intruder_signal_value, second_intruder_state):
-    if second_intruder_signal_value is True and second_intruder_state is False:
-        value1 = "second intruder detected"
-    elif second_intruder_signal_value is False and second_intruder_state is True:
-        value1 = "second intruder cleared"
-    else:
-        value1 = None
-    return value1
-
-
-def check_set(set_unset_signal_value, set_state):
-    if set_unset_signal_value is True and set_state is False:
-        value1 = "alarm set"
-    elif set_unset_signal_value is False and set_state is True:
-        value1 = "alarm unset"
-    else:
-        value1 = None
-    return value1
 
 
 def wifi_connected():
@@ -120,51 +91,81 @@ def send_webhook(url):
     return True
 
 
-def poll_alarm_signal(intruder_signal_value, alarm_state):
-    sent_webhook = None
-    value1 = check_intruder(intruder_signal_value, alarm_state)
-    if value1 == "alarm activated":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        alarm_state = True
-    elif value1 == "alarm stopped":
-        alarm_state = False
-    return alarm_state, sent_webhook
+# # actions
+# def check_intruder(intruder_signal_value, alarm_state):
+#     if intruder_signal_value is True and alarm_state is False:
+#         value1 = "alarm activated"
+#     elif intruder_signal_value is False and alarm_state is True:
+#         value1 = "alarm stopped"
+#     else:
+#         value1 = None
+#     return value1
 
 
-def poll_set_signal(set_unset_signal_value, set_state):
-    value1 = check_set(set_unset_signal_value, set_state)
-    sent_webhook = None
-    if value1 == "alarm set":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        set_state = True
-    elif value1 == "alarm unset":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        set_state = False
-    return set_state, sent_webhook
+# def check_second_intruder(second_intruder_signal_value, second_intruder_state):
+#     if second_intruder_signal_value is True and second_intruder_state is False:
+#         value1 = "second intruder detected"
+#     elif second_intruder_signal_value is False and second_intruder_state is True:
+#         value1 = "second intruder cleared"
+#     else:
+#         value1 = None
+#     return value1
 
 
-def poll_second_intruder_signal(second_intruder_signal_value, second_intruder_state):
-    value1 = check_second_intruder(second_intruder_signal_value, second_intruder_state)
-    sent_webhook = None
-    if value1 == "second intruder detected":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        second_intruder_state = True
-    elif value1 == "second intruder cleared":
-        second_intruder_state = False
-    return second_intruder_state, sent_webhook
+# def check_set(set_unset_signal_value, set_state):
+#     if set_unset_signal_value is True and set_state is False:
+#         value1 = "alarm set"
+#     elif set_unset_signal_value is False and set_state is True:
+#         value1 = "alarm unset"
+#     else:
+#         value1 = None
+#     return value1
+
+# def poll_alarm_signal(intruder_signal_value, alarm_state):
+#     sent_webhook = None
+#     value1 = check_intruder(intruder_signal_value, alarm_state)
+#     if value1 == "alarm activated":
+#         url = create_url(value1)
+#         sent_webhook = send_webhook(url)
+#         alarm_state = True
+#     elif value1 == "alarm stopped":
+#         alarm_state = False
+#     return alarm_state, sent_webhook
 
 
-def poll_all_signals():
-    initialise_variables()
-    alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)[0]
-    set_state = poll_set_signal(set_unset_signal_value, set_state)[0]
-    second_intruder_state = poll_second_intruder_signal(
-        second_intruder_signal_value, second_intruder_state
-    )[0]
+# def poll_set_signal(set_unset_signal_value, set_state):
+#     value1 = check_set(set_unset_signal_value, set_state)
+#     sent_webhook = None
+#     if value1 == "alarm set":
+#         url = create_url(value1)
+#         sent_webhook = send_webhook(url)
+#         set_state = True
+#     elif value1 == "alarm unset":
+#         url = create_url(value1)
+#         sent_webhook = send_webhook(url)
+#         set_state = False
+#     return set_state, sent_webhook
+
+
+# def poll_second_intruder_signal(second_intruder_signal_value, second_intruder_state):
+#     value1 = check_second_intruder(second_intruder_signal_value, second_intruder_state)
+#     sent_webhook = None
+#     if value1 == "second intruder detected":
+#         url = create_url(value1)
+#         sent_webhook = send_webhook(url)
+#         second_intruder_state = True
+#     elif value1 == "second intruder cleared":
+#         second_intruder_state = False
+#     return second_intruder_state, sent_webhook
+
+
+# def poll_all_signals():
+#     initialise_variables()
+#     alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)[0]
+#     set_state = poll_set_signal(set_unset_signal_value, set_state)[0]
+#     second_intruder_state = poll_second_intruder_signal(
+#         second_intruder_signal_value, second_intruder_state
+#     )[0]
 
 
 if __name__ == "__main__":
