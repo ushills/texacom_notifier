@@ -33,15 +33,17 @@ INTRUDER_PIN = Pin(5, Pin.IN)
 SET_UNSET_PIN = Pin(4, Pin.IN)
 # SECOND_INTRUDER_PIN = D3 (GPIO0)
 SECOND_INTRUDER_PIN = Pin(0, Pin.IN)
+
+# define outputs
 # esp LED
 WIFI_LED_PIN = Pin(16, Pin.OUT)
+wifi_LED = Signal(WIFI_LED_PIN, invert=True)
 
-# # define signals
+
+# define signals
 intruder_signal = Signal(INTRUDER_PIN, invert=True)
 set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
-wifi_LED = Signal(WIFI_LED_PIN, invert=True)
-alarm_state = None
 
 
 def create_url(action):
@@ -88,7 +90,7 @@ def check_set(set_unset_signal_value, set_state):
     return value1
 
 
-def check_wifi_connected():
+def wifi_connected():
     if not wlan.isconnected():
         wifi_LED.off()
 
@@ -103,6 +105,7 @@ def wifi_connect():
             pass
     print("network config:", wlan.ifconfig())
     wifi_LED.on()
+    return wlan
 
 
 def send_webhook(url):
@@ -112,7 +115,7 @@ def send_webhook(url):
     s.connect(addr)
     s.send(full_url)
     # may not need to receive data, check if webhook works without and delete
-    data = s.recv(1000)
+    # data = s.recv(1000)
     s.close()
     return True
 
@@ -156,20 +159,29 @@ def poll_second_intruder_signal(second_intruder_signal_value, second_intruder_st
 
 
 def poll_all_signals():
-    if intruder_signal.value() != intruder_signal_value:
-        intruder_signal_value = intruder_signal.value()
-        # as poll_* returns both state and sent_webhook value just take the first element [0]
-        alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)[0]
-    if set_unset_signal.value() != set_unset_signal_value:
-        set_unset_signal_value = set_unset_signal.value()
-        set_state = poll_set_signal(set_unset_signal_value, set_state)[0]
-    if second_intruder_signal_value != second_intruder_signal.value():
-        second_intruder_signal_value = second_intruder_signal.value()
-        second_intruder_state = poll_second_intruder_signal(
-            second_intruder_signal_value, second_intruder_state
-        )[0]
+    initialise_variables()
+    alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)[0]
+    set_state = poll_set_signal(set_unset_signal_value, set_state)[0]
+    second_intruder_state = poll_second_intruder_signal(
+        second_intruder_signal_value, second_intruder_state
+    )[0]
 
 
 if __name__ == "__main__":
-    poll_all_signals()
-    pass
+    # initialise variables
+    intruder_signal_value = intruder_signal.value()
+    set_unset_signal_value = set_unset_signal.value()
+    second_intruder_signal_value = second_intruder_signal.value()
+    alarm_state = None
+    set_state = None
+    second_intruder_state = None
+
+    # connect to the network
+    wifi_connect()
+
+    # main loop poll all signals if wifi is connected else re-connect network
+    while True:
+        if wifi_connected:
+            poll_all_signals()
+        else:
+            wifi_connect()

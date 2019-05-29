@@ -22,7 +22,6 @@ from main import (
     check_intruder,
     check_second_intruder,
     check_set,
-    send_webhook,
     poll_alarm_signal,
     poll_set_signal,
     poll_second_intruder_signal,
