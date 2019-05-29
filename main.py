@@ -46,7 +46,7 @@ set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 
-class Output:
+class OutputManager:
     def __init__(self):
         self.output_is_active = False
         self.command1 = None

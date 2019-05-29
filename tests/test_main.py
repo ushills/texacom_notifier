@@ -17,7 +17,7 @@ mock_usocket = MagicMock()
 sys.modules["usocket"] = mock_usocket
 
 
-from main import create_url
+from main import create_url, OutputManager
 
 
 # patch global variables to isolate test case
@@ -32,7 +32,7 @@ def test_create_url():
 
 
 # check webook send functions
-# mock send_webhook
+# mock send_webhook with fake_send_webhook
 def fake_send_webhook(url):
     full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(url).encode()
     print("webhook sent\n{}".format(full_url))
@@ -48,6 +48,91 @@ def test_send_webhook(send_webhook):
         full_url
         == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/alarm_activated/with/key/{IFTTT webhook key}?value1=test action\r\n\r\n"
     )
+
+
+# test Output signals
+# mock Output.trigger_command function for test
+def fake_Output_trigger_command():
+    return "output triggered"
+
+
+@pytest.fixture(scope="class")
+def output_manager():
+    return OutputManager()
+
+
+@pytest.fixture(scope="class")
+def output_manager_trigger_method():
+    OutputManager = Mock()
+    return OutputManager.trigger_command
+
+
+@pytest.fixture(scope="class")
+def output_manager_cease_method():
+    OutputManager = Mock()
+    return OutputManager.cease_command
+
+
+def test_Output_init():
+    test_alarm = OutputManager()
+    assert test_alarm.output_is_active is False
+    assert test_alarm.command1 is None
+    assert test_alarm.command2 is None
+
+
+class TestDoNotTriggerOutput:
+    @pytest.fixture(scope="class", autouse=True)
+    def handle_false_output_value(self, output_manager):
+        output_manager.check_output(False)
+
+    def test_output_is_not_active(self, output_manager):
+        assert not output_manager.output_is_active
+
+    def test_trigger_command_is_not_called(self, output_manager_trigger_method):
+        assert output_manager_trigger_method.assert_not_called
+
+    def test_cease_command_is_not_called(self, output_manager_cease_method):
+        assert output_manager_cease_method.assert_not_called
+
+
+class TestTriggerOutput:
+    @pytest.fixture(scope="class", autouse=True)
+    def handle_true_output_value(self, output_manager):
+        output_manager.check_output(True)
+
+    def test_output_is_active(self, output_manager):
+        assert output_manager.output_is_active
+
+    def test_trigger_command_is_called(self, output_manager_trigger_method):
+        assert output_manager_trigger_method.assert_called_once
+
+    def test_cease_command_is_not_called(self, output_manager_cease_method):
+        assert output_manager_cease_method.assert_not_called
+
+
+# @patch("main.Output.trigger_command", side_effect=fake_Output_trigger_command)
+# def test_output_trigger(trigger_command):
+#     test_alarm = Output()
+#     test_alarm.check_output(True)
+#     assert test_alarm.output_is_active is True
+#     assert Output.trigger_command.called is True
+
+
+# @patch("main.Output.trigger_command", side_effect=fake_Output_trigger_command)
+# def test_output_trigger_maintained(trigger_command):
+#     test_alarm = Output()
+#     test_alarm.check_output(True)
+#     test_alarm.check_output(True)
+#     assert test_alarm.output_is_active is True
+#     assert Output.trigger_command.assert_called_once is True
+
+
+# @pytest.fixture(scope="class")
+# def output_manager():
+#     return Output()
+
+# @pytest.fixture(scope="class")
+# def output_manager_trigger_method
 
 
 # # test alarm signals
