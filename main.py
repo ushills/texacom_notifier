@@ -48,7 +48,7 @@ second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 class OutputManager:
     def __init__(self):
-        self.output_is_active = False
+        self.output_is_active = None
         self.command1 = None
         self.command2 = None
 
