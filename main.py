@@ -48,7 +48,7 @@ second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 class OutputManager:
     def __init__(self):
-        self.output_is_active = None
+        self.output_is_active = False
         self.command1 = None
         self.command2 = None
 
@@ -62,12 +62,12 @@ class OutputManager:
         self.output_is_active = output_value
 
     def trigger_command(self):
-        print("{} triggered".format(self.command1))
+        print("{} command 1 triggered".format(self.command1))
         return "command triggered"
 
     def cease_command(self):
         if self.command2 is not None:
-            print("{} triggered".format(self.command2))
+            print("{} command2 triggered".format(self.command2))
             return "command2 triggered"
         else:
             print("{} ceased".format(self.command1))
