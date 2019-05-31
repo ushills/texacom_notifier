@@ -36,10 +36,3 @@ class TestTriggerOutput:
 
     def test_the_output_is_active(self, alarm_output):
         assert alarm_output.output_is_active
-
-
-def test_alarm_triggers_trigger_command():
-    test_alarm = OutputManager()
-    alarm_output.check_output(True)
-    assert test_alarm.output_is_active
-
