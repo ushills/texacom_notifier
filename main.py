@@ -20,8 +20,8 @@ import network
 import usocket as socket
 
 # global variables
-WEBHOOK_KEY = "oeuoypop.opooueou"
-WEBHOOK_EVENT = "alarm_activated"
+WEBHOOK_KEY = "{{webhook_key}}"
+WEBHOOK_EVENT = "{{webhook_event}}"
 BASE_URL = "https://maker.ifttt.com"
 SSID = "{SSID name}"
 SSID_PASSWORD = "{SSID password}"
@@ -63,12 +63,15 @@ class OutputManager:
 
     def trigger_command(self):
         print("{} triggered".format(self.command1))
+        return "command triggered"
 
     def cease_command(self):
         if self.command2 is not None:
             print("{} triggered".format(self.command2))
+            return "command2 triggered"
         else:
             print("{} ceased".format(self.command1))
+            return "cease triggered"
 
 
 def create_url(action):

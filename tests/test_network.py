@@ -17,7 +17,6 @@ sys.modules["usocket"] = mock_usocket
 
 
 import main
-from main import create_url, send_webhook
 
 
 @pytest.fixture(autouse=True)
@@ -29,7 +28,7 @@ def redefine_webhook_variables():
 def test_create_url(redefine_webhook_variables):
     action = "testAction"
     assert (
-        create_url(action)
+        main.create_url(action)
         == "https://maker.ifttt.com/trigger/testWebhookEvent/with/key/testWebhookKey?value1=testAction"
     )
 

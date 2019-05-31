@@ -8,31 +8,37 @@ mock_machine = MagicMock()
 sys.modules["machine"] = mock_machine
 
 from main import OutputManager
-
-# create an instance of OutputManager
-@pytest.fixture(scope="module")
-def alarm_output():
-    return OutputManager()
+import main
 
 
-# mock the commands
+def mock_OutputManager_trigger_command_return(command):
+    return "trigger command actioned"
 
 
-class TestAlarmDoesNotTriggerOutput:
-    # do not trigger the output
-    @pytest.fixture(scope="class", autouse="True")
-    def alarm_output_is_not_active(self, alarm_output):
-        alarm_output.check_output(False)
-
-    def test_the_output_is_not_active(self, alarm_output):
-        assert not alarm_output.output_is_active
+# @pytest.fixture(autouse=True)
+# def mock_OutputManager_trigger_command(monkeypatch):
+#     monkeypatch.setattr(
+#         OutputManager, "trigger_command", mock_OutputManager_trigger_command_return
+#     )
 
 
-class TestTriggerOutput:
-    # trigger the output
-    @pytest.fixture(scope="class", autouse="True")
-    def alarm_output_is_active(self, alarm_output):
-        alarm_output.check_output(True)
+def test_output_is_active_starts_at_None():
+    test_alarm = OutputManager()
+    assert test_alarm.output_is_active is None
 
-    def test_the_output_is_active(self, alarm_output):
-        assert alarm_output.output_is_active
+
+def test_triggering_alarm_changes_output_is_active_to_true():
+    test_alarm = OutputManager()
+    test_alarm.check_output(True)
+    assert test_alarm.output_is_active is True
+
+
+def test_triggering_alarm_triggers_command1(monkeypatch):
+    test_alarm = OutputManager()
+    monkeypatch.setattr(
+        "main.OutputManager.trigger_command", mock_OutputManager_trigger_command_return
+    )
+
+    test_alarm.check_output(True)
+    assert test_alarm.trigger_command() == "trigger command actioned"
+
