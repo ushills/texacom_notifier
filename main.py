@@ -48,30 +48,29 @@ second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 # define notifier class
 class Notifier:
     def __init__(self):
-        self.output_is_active = False
-        self.command1 = None
-        self.command2 = None
-        self.url = None
+        self.signal_is_active = False
+        self.action1 = None
+        self.action2 = None
 
-    def check_output(self, output_value):
-        update_output = output_value != self.output_is_active
-        if update_output:
-            if output_value is True:
-                self.trigger_command()
+    def check_signal(self, signal_value):
+        update_signal = signal_value != self.signal_is_active
+        if update_signal is True:
+            if signal_value is True:
+                self.send_action1()
             else:
-                return self.cease_command()
-        self.output_is_active = output_value
+                self.send_action2_or_cease()
+        self.signal_is_active = signal_value
 
-    def trigger_command(self):
-        print("{} command 1 triggered".format(self.command1))
+    def send_action1(self):
+        print("{} command 1 triggered".format(self.action1))
         return "command triggered"
 
-    def cease_command(self):
-        if self.command2 is not None:
-            print("{} command2 triggered".format(self.command2))
-            return "command2 triggered"
+    def send_action2_or_cease(self):
+        if self.action2 is not None:
+            print("{} action2 triggered".format(self.action2))
+            return "action2 triggered"
         else:
-            print("{} ceased".format(self.command1))
+            print("{} ceased".format(self.action1))
             return "cease triggered"
 
     def create_url(self, action):
@@ -84,11 +83,13 @@ class Notifier:
             + "?value1="
             + action
         )
-        self.url = url
-        return self.url
+        return url
 
-    def send_webhook(self):
-        full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(self.url).encode()
+    def send_webhook(self, action):
+        full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
+            self.create_url(action)
+        ).encode()
+
         #     addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
         #     s = socket.socket()
         #     s.connect(addr)
@@ -96,6 +97,7 @@ class Notifier:
         #     # may not need to receive data, check if webhook works without and delete
         #     # data = s.recv(1000)
         #     s.close()
+        print("webhook sent\n")
         return full_url
 
 
