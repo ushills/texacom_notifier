@@ -52,27 +52,6 @@ class Notifier:
         self.action1 = None
         self.action2 = None
 
-    def check_signal(self, signal_value):
-        update_signal = signal_value != self.signal_is_active
-        if update_signal is True:
-            if signal_value is True:
-                self.send_action1()
-            else:
-                self.send_action2_or_cease()
-        self.signal_is_active = signal_value
-
-    def send_action1(self):
-        print("{} command 1 triggered".format(self.action1))
-        return "command triggered"
-
-    def send_action2_or_cease(self):
-        if self.action2 is not None:
-            print("{} action2 triggered".format(self.action2))
-            return "action2 triggered"
-        else:
-            print("{} ceased".format(self.action1))
-            return "cease triggered"
-
     def create_url(self, action):
         url = (
             BASE_URL
@@ -99,6 +78,27 @@ class Notifier:
         #     s.close()
         print("webhook sent\n")
         return full_url
+
+    def check_signal(self, signal_value):
+        update_signal = signal_value != self.signal_is_active
+        if update_signal is True:
+            if signal_value is True:
+                self.send_action1()
+            else:
+                self.send_action2_or_cease()
+        self.signal_is_active = signal_value
+
+    def send_action1(self):
+        self.send_webhook(self.action1)
+        return "action1 triggered"
+
+    def send_action2_or_cease(self):
+        if self.action2 is not None:
+            print("{} action2 triggered".format(self.action2))
+            return "action2 triggered"
+        else:
+            print("{} ceased".format(self.action1))
+            return "cease triggered"
 
 
 def wifi_connected():

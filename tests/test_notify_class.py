@@ -22,42 +22,48 @@ import main
 """
 
 
-@pytest.fixture(scope="class")
-def test_signal():
-    return Notifier()
-
-
-@pytest.fixture(scope="class")
-def set_action1():
-    test_signal.action1 = "signal activated"
-
-
-@pytest.fixture(scope="class")
-def set_action2():
-    test_signal.action2 = "signal unactivated"
-
-
-@pytest.fixture(scope="class")
-def set_signal_true(test_signal):
-    test_signal.check_signal(True)
-
-
-# def mock_action1_return():
-#     return "action1 sent"
-
-
-# @pytest.fixture(scope="module")
-# def mock_send_action1(monkeypatch):
-#     monkeypatch.settattr("main.Notifier.send_action1", mock_action1_return)
-
-
 class TestNotifier:
+    @pytest.fixture(scope="class")
+    def test_signal(self):
+        return Notifier()
+
+    @pytest.fixture(scope="class")
+    def set_action1(self, test_signal):
+        test_signal.action1 = "signal activated"
+
+    @pytest.fixture(scope="class")
+    def set_action2(self, test_signal):
+        test_signal.action2 = "signal unactivated"
+
+    @pytest.fixture(scope="class")
+    def set_signal_true(self, test_signal):
+        test_signal.check_signal(True)
+
+    @pytest.fixture(scope="class")
+    def set_signal_false(self, test_signal):
+        test_signal.check_signal(False)
+
+    def mock_action1_return(self):
+        return "action1 sent"
+
+    # @pytest.fixture(autouse=True)
+    # def mock_send_action1(monkeypatch):
+    #     monkeypatch.setattr("main.Notifier.send_action1", "action1 sent")
+
     def test_signal_true_gives_signal_is_active(
         self, test_signal, set_action1, set_signal_true
     ):
         assert test_signal.signal_is_active is True
 
-    # def test_signal_true_triggers_send_action1(
-    #     self, test_signal, set_action1, mock_send_action1
+    def test_signal_false_gives_signal_is_not_active(
+        self, test_signal, set_action1, set_signal_false
+    ):
+        assert test_signal.signal_is_active is False
+
+    def test_signal_true_triggers_send_action1(self, test_signal, set_action1):
+        assert test_signal.check_signal(True) == "action1 sent"
+
+    # def test_signal_true_trigger_command_return(
+    #     self, test_signal, set_action1, set_signal_true
     # ):
-    #     assert test_signal.check_signal(True) == "action1 sent"
+    #     assert test_signal.send_action1 == "action1 sent"
