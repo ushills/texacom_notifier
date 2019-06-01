@@ -45,12 +45,52 @@ set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 
-# define notifier class
+"""The Notifier class checks the inputs from a signal and depending on the 
+input triggers certain external actions, in this case triggering a webhook
+using IFTTT.
+
+The class has the following methods for direct use:
+
+    check_signal(signal_input) - checks the signal and triggers the webhook 
+        if state has changed.
+    set_action1(str) - sets the action(value1) to be sent with the webhook.
+    set_action2(str) - sets the action(value2) to be sent with the webhook.
+
+The following methods are exposed but are not intended for direct use but
+are available for testing purposes:
+
+    create_url(str) - creates a url in the format required by IFTTT to 
+        trigger the webhook.
+    send_webhook(str) - creates the full url required for Micropython usocket,
+        from create_url, creates a socket connection and sends the webhook.
+
+"""
+
+
 class Notifier:
     def __init__(self):
         self.signal_is_active = False
         self.action1 = None
         self.action2 = None
+
+    def check_signal(self, signal_value):
+        update_signal = signal_value != self.signal_is_active
+        if update_signal is True:
+            if signal_value is True:
+                self.signal_is_active = True
+                return self.trigger_action1()
+            else:
+                self.signal_is_active = False
+                return self.trigger_action2_or_cease()
+
+    def trigger_action1(self):
+        return self.send_webhook(self.action1)
+
+    def trigger_action2_or_cease(self):
+        if self.action2 is not None:
+            return self.send_webhook(self.action2)
+        else:
+            return self.action1 + " ceased"
 
     def create_url(self, action):
         url = (
@@ -65,7 +105,7 @@ class Notifier:
         return url
 
     def send_webhook(self, action):
-        full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
+        self.full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
             self.create_url(action)
         ).encode()
 
@@ -76,29 +116,16 @@ class Notifier:
         #     # may not need to receive data, check if webhook works without and delete
         #     # data = s.recv(1000)
         #     s.close()
-        print("webhook sent\n")
-        return full_url
+        print("webhook sent")
+        return self.full_url
 
-    def check_signal(self, signal_value):
-        update_signal = signal_value != self.signal_is_active
-        if update_signal is True:
-            if signal_value is True:
-                self.send_action1()
-            else:
-                self.send_action2_or_cease()
-        self.signal_is_active = signal_value
+    def set_action1(self, action):
+        self.action1 = action
+        return self.action1
 
-    def send_action1(self):
-        self.send_webhook(self.action1)
-        return "action1 triggered"
-
-    def send_action2_or_cease(self):
-        if self.action2 is not None:
-            print("{} action2 triggered".format(self.action2))
-            return "action2 triggered"
-        else:
-            print("{} ceased".format(self.action1))
-            return "cease triggered"
+    def set_action2(self, action):
+        self.action2 = action
+        return self.action2
 
 
 def wifi_connected():
