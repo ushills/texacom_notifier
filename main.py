@@ -39,18 +39,19 @@ SECOND_INTRUDER_PIN = Pin(0, Pin.IN)
 WIFI_LED_PIN = Pin(16, Pin.OUT)
 wifi_LED = Signal(WIFI_LED_PIN, invert=True)
 
-
 # define signals
 intruder_signal = Signal(INTRUDER_PIN, invert=True)
 set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 
-class OutputManager:
+# define notifier class
+class Notifier:
     def __init__(self):
         self.output_is_active = False
         self.command1 = None
         self.command2 = None
+        self.url = None
 
     def check_output(self, output_value):
         update_output = output_value != self.output_is_active
@@ -58,7 +59,7 @@ class OutputManager:
             if output_value is True:
                 self.trigger_command()
             else:
-                self.cease_command()
+                return self.cease_command()
         self.output_is_active = output_value
 
     def trigger_command(self):
@@ -73,18 +74,29 @@ class OutputManager:
             print("{} ceased".format(self.command1))
             return "cease triggered"
 
+    def create_url(self, action):
+        url = (
+            BASE_URL
+            + "/trigger/"
+            + WEBHOOK_EVENT
+            + "/with/key/"
+            + WEBHOOK_KEY
+            + "?value1="
+            + action
+        )
+        self.url = url
+        return self.url
 
-def create_url(action):
-    url = (
-        BASE_URL
-        + "/trigger/"
-        + WEBHOOK_EVENT
-        + "/with/key/"
-        + WEBHOOK_KEY
-        + "?value1="
-        + action
-    )
-    return url
+    def send_webhook(self):
+        full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(self.url).encode()
+        #     addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
+        #     s = socket.socket()
+        #     s.connect(addr)
+        #     s.send(full_url)
+        #     # may not need to receive data, check if webhook works without and delete
+        #     # data = s.recv(1000)
+        #     s.close()
+        return full_url
 
 
 def wifi_connected():
@@ -103,18 +115,6 @@ def wifi_connect():
     print("network config:", wlan.ifconfig())
     wifi_LED.on()
     return wlan
-
-
-def send_webhook(url):
-    full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(url).encode()
-    addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
-    s = socket.socket()
-    s.connect(addr)
-    s.send(full_url)
-    # may not need to receive data, check if webhook works without and delete
-    # data = s.recv(1000)
-    s.close()
-    return True
 
 
 if __name__ == "__main__":
