@@ -44,6 +44,7 @@ class TestNotifier:
     @pytest.fixture(scope="class")
     def set_signal_false(self, test_signal):
         test_signal.check_signal(False)
+
     def test_signal_true_gives_signal_is_active(
         self, test_signal, set_action1, set_signal_true
     ):
@@ -55,11 +56,18 @@ class TestNotifier:
         assert test_signal.signal_is_active is False
 
     def test_create_url(self, test_signal):
-        assert test_signal.create_url("test action") == "https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action"
+        assert (
+            test_signal.create_url("test action")
+            == "https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action"
+        )
 
     def test_send_webhook_value(self, test_signal):
-        assert test_signal.send_webhook("test action") == b'GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action\r\n\r\n'
-   
+        assert (
+            test_signal.send_webhook("test action")
+            == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action\r\n\r\n"
+        )
+
     def test_send_webhook_type(self, test_signal):
         assert type(test_signal.send_webhook("test action")) == bytes
-   
+
+

@@ -105,19 +105,18 @@ class Notifier:
         return url
 
     def send_webhook(self, action):
-        self.full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
+        full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
             self.create_url(action)
         ).encode()
-
-        #     addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
-        #     s = socket.socket()
-        #     s.connect(addr)
-        #     s.send(full_url)
-        #     # may not need to receive data, check if webhook works without and delete
-        #     # data = s.recv(1000)
-        #     s.close()
+        addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
+        s = socket.socket()
+        s.connect(addr)
+        s.send(full_url)
+        # may not need to receive data, check if webhook works without and delete
+        # data = s.recv(1000)
+        s.close()
         print("webhook sent")
-        return self.full_url
+        return full_url
 
     def set_action1(self, action):
         self.action1 = action
