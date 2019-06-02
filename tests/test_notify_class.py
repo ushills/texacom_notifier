@@ -82,3 +82,13 @@ class TestNotifier:
 
     def test_sigal_deactivation_sends_ceased_response(self, test_signal, set_signal_true):
         assert test_signal.check_signal(False) == "signal activated ceased"
+
+    def test_signal_deactivation_sends_action2_response_when_action2_exists(
+        self, test_signal, set_signal_true, set_action1, set_action2
+    ):
+        test_signal.check_signal(True)
+        assert (
+            test_signal.check_signal(False)
+            == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal unactivated\r\n\r\n"
+        )
+

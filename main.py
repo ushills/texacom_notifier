@@ -87,10 +87,12 @@ class Notifier:
         return self.send_webhook(self.action1)
 
     def trigger_action2_or_cease(self):
-        if self.action2 is not None:
-            return self.send_webhook(self.action2)
-        else:
+        print("\naction2 = ", self.action2)
+        if self.action2 is None:
             return self.action1 + " ceased"
+
+        else:
+            return self.send_webhook(self.action2)
 
     def create_url(self, action):
         url = (
