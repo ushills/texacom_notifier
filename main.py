@@ -139,7 +139,7 @@ def wifi_connect():
     wlan.active(True)
     if not wlan.isconnected():
         print("connecting to network...")
-        wlan.connect("SSID", "SSIDPASSWORD")
+        wlan.connect(SSID, SSID_PASSWORD)
         while not wlan.isconnected():
             pass
     print("network config:", wlan.ifconfig())
