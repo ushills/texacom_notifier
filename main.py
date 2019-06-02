@@ -148,13 +148,18 @@ def wifi_connect():
 
 
 if __name__ == "__main__":
-    # initialise variables
-    intruder_signal_value = intruder_signal.value()
-    set_unset_signal_value = set_unset_signal.value()
-    second_intruder_signal_value = second_intruder_signal.value()
-    alarm_state = None
-    set_state = None
-    second_intruder_state = None
+    # initialise intruder class
+    intruder = Notifier()
+    intruder.set_action1("intruder detected")
+
+    # initialise second intruder class
+    second_intruder = Notifier()
+    second_intruder.set_action1("second intruder detected")
+
+    # initialise set_unset class
+    set_unset = Notifier()
+    set_unset.set_action1("alarm set")
+    set_unset.set_action2("alarm unset")
 
     # connect to the network
     wifi_connect()
@@ -162,6 +167,8 @@ if __name__ == "__main__":
     # main loop poll all signals if wifi is connected else re-connect network
     while True:
         if wifi_connected:
-            poll_all_signals()
+            intruder.check_signal(intruder_signal)
+            second_intruder.check_signal(second_intruder_signal)
+            set_unset.check_signal(set_unset_signal)
         else:
             wifi_connect()
