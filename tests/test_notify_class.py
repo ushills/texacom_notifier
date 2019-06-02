@@ -70,4 +70,15 @@ class TestNotifier:
     def test_send_webhook_type(self, test_signal):
         assert type(test_signal.send_webhook("test action")) == bytes
 
+    def test_first_signal_sends_webhook(self, test_signal):
+        assert (
+            test_signal.check_signal(True)
+            == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal activated\r\n\r\n"
+        )
 
+    def test_second_signal_does_not_send_webhook(self, test_signal, set_signal_true):
+        # send second test_signal signal
+        assert test_signal.check_signal(True) is None
+
+    def test_sigal_deactivation_sends_ceased_response(self, test_signal, set_signal_true):
+        assert test_signal.check_signal(False) == "signal activated ceased"
