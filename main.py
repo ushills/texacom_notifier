@@ -45,21 +45,21 @@ set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 
-"""The Notifier class checks the inputs from a signal and depending on the 
+"""The Notifier class checks the inputs from a signal and depending on the
 input triggers certain external actions, in this case triggering a webhook
 using IFTTT.
 
 The class has the following methods for direct use:
 
-    check_signal(signal_input) - checks the signal and triggers the webhook 
-        if state has changed.
+    check_signal(signal_input) - checks the signal and triggers the webhook
+        if the signal state has changed.
     set_action1(str) - sets the action(value1) to be sent with the webhook.
     set_action2(str) - sets the action(value2) to be sent with the webhook.
 
 The following methods are exposed but are not intended for direct use but
 are available for testing purposes:
 
-    create_url(str) - creates a url in the format required by IFTTT to 
+    create_url(str) - creates a url in the format required by IFTTT to
         trigger the webhook.
     send_webhook(str) - creates the full url required for Micropython usocket,
         from create_url, creates a socket connection and sends the webhook.
@@ -136,18 +136,21 @@ def wifi_connected():
 
 def wifi_connect():
     wlan = network.WLAN(network.STA_IF)
+    print("turning WiFi on...")
     wlan.active(True)
     if not wlan.isconnected():
-        print("connecting to network...")
+        print("connecting to network...", SSID)
         wlan.connect(SSID, SSID_PASSWORD)
         while not wlan.isconnected():
             pass
+    print("connected to network", SSID)
     print("network config:", wlan.ifconfig())
     wifi_LED.on()
     return wlan
 
 
 if __name__ == "__main__":
+    print("Initialising.....")
     # initialise intruder class
     intruder = Notifier()
     intruder.set_action1("intruder detected")
@@ -171,4 +174,5 @@ if __name__ == "__main__":
             second_intruder.check_signal(second_intruder_signal)
             set_unset.check_signal(set_unset_signal)
         else:
+            print("Network connection failed, trying to reconnect...")
             wifi_connect()
