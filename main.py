@@ -93,15 +93,17 @@ class Notifier:
         return self.send_webhook(self.action1)
 
     def trigger_action2_or_cease(self):
-        print("Signal removed...", self.action2)
         if self.action2 is None:
+            print("Signal ceased...", self.action1)
             return self.action1 + " ceased"
         else:
+            print("Signal removed...", self.action2)
             return self.send_webhook(self.action2)
 
     def create_url(self, action):
         url = (
-            BASE_URL
+            "http://"
+            + BASE_URL
             + "/trigger/"
             + WEBHOOK_EVENT
             + "/with/key/"

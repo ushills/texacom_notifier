@@ -58,13 +58,13 @@ class TestNotifier:
     def test_create_url(self, test_signal):
         assert (
             test_signal.create_url("test action")
-            == "https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action"
+            == "http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action"
         )
 
     def test_send_webhook_value(self, test_signal):
         assert (
             test_signal.send_webhook("test action")
-            == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action\r\n\r\n"
+            == b"GET / HTTP/1.1\r\nHost: http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test action\r\n\r\n"
         )
 
     def test_send_webhook_type(self, test_signal):
@@ -73,7 +73,7 @@ class TestNotifier:
     def test_first_signal_sends_webhook(self, test_signal):
         assert (
             test_signal.check_signal(True)
-            == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal activated\r\n\r\n"
+            == b"GET / HTTP/1.1\r\nHost: http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal activated\r\n\r\n"
         )
 
     def test_second_signal_does_not_send_webhook(self, test_signal, set_signal_true):
@@ -89,6 +89,6 @@ class TestNotifier:
         test_signal.check_signal(True)
         assert (
             test_signal.check_signal(False)
-            == b"GET / HTTP/1.1\r\nHost: https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal unactivated\r\n\r\n"
+            == b"GET / HTTP/1.1\r\nHost: http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal unactivated\r\n\r\n"
         )
 
