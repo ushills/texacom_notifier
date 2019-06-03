@@ -119,7 +119,7 @@ class Notifier:
             self.create_url(action)
         ).encode()
         addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
-        print("Establishing sockect connection...")
+        print("Establishing socket connection...")
         s = socket.socket()
         s.connect(addr)
         print("Sending webhook...")
