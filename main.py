@@ -88,7 +88,6 @@ class Notifier:
         return self.send_webhook(self.action1)
 
     def trigger_action2_or_cease(self):
-        print("\naction2 = ", self.action2)
         if self.action2 is None:
             return self.action1 + " ceased"
 
@@ -172,7 +171,7 @@ if __name__ == "__main__":
 
     # main loop poll all signals if wifi is connected else re-connect network
     while True:
-        if wifi_connected:
+        if wifi_connected():
             intruder.check_signal(intruder_signal)
             second_intruder.check_signal(second_intruder_signal)
             set_unset.check_signal(set_unset_signal)
