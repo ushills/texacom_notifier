@@ -84,13 +84,13 @@ class Notifier:
                 return self.trigger_action2_or_cease()
 
     def trigger_action1(self):
+        print("Signal detected...", self.action1)
         return self.send_webhook(self.action1)
 
     def trigger_action2_or_cease(self):
-        print("\naction2 = ", self.action2)
+        print("Signal removed...", self.action2)
         if self.action2 is None:
             return self.action1 + " ceased"
-
         else:
             return self.send_webhook(self.action2)
 
@@ -107,17 +107,20 @@ class Notifier:
         return url
 
     def send_webhook(self, action):
+        print("Sending webhook for...", action)
         full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
             self.create_url(action)
         ).encode()
         addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
+        print("Establishing sockect connection...")
         s = socket.socket()
         s.connect(addr)
+        print("Sending webhook...")
         s.send(full_url)
         # may not need to receive data, check if webhook works without and delete
         # data = s.recv(1000)
         s.close()
-        print("webhook sent")
+        print("Webhook sent")
         return full_url
 
     def set_action1(self, action):
