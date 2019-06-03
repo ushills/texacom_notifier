@@ -20,8 +20,8 @@ import network
 import usocket as socket
 
 # global variables
-WEBHOOK_KEY = "{IFTTT webhook key}"
-WEBHOOK_EVENT = "alarm_activated"
+WEBHOOK_KEY = "{{webhook_key}}"
+WEBHOOK_EVENT = "{{webhook_event}}"
 BASE_URL = "https://maker.ifttt.com"
 SSID = "{SSID name}"
 SSID_PASSWORD = "{SSID password}"
@@ -39,55 +39,94 @@ SECOND_INTRUDER_PIN = Pin(0, Pin.IN)
 WIFI_LED_PIN = Pin(16, Pin.OUT)
 wifi_LED = Signal(WIFI_LED_PIN, invert=True)
 
-
 # define signals
 intruder_signal = Signal(INTRUDER_PIN, invert=True)
 set_unset_signal = Signal(SET_UNSET_PIN, invert=True)
 second_intruder_signal = Signal(SECOND_INTRUDER_PIN, invert=True)
 
 
-def create_url(action):
-    url = (
-        BASE_URL
-        + "/trigger/"
-        + WEBHOOK_EVENT
-        + "/with/key/"
-        + WEBHOOK_KEY
-        + "?value1="
-        + action
-    )
-    return url
+"""The Notifier class checks the inputs from a signal and depending on the
+input triggers certain external actions, in this case triggering a webhook
+using IFTTT.
+
+The class has the following methods for direct use:
+
+    check_signal(signal_input) - checks the signal and triggers the webhook
+        if the signal state has changed.
+    set_action1(str) - sets the action(value1) to be sent with the webhook.
+    set_action2(str) - sets the action(value2) to be sent with the webhook.
+
+The following methods are exposed but are not intended for direct use but
+are available for testing purposes:
+
+    create_url(str) - creates a url in the format required by IFTTT to
+        trigger the webhook.
+    send_webhook(str) - creates the full url required for Micropython usocket,
+        from create_url, creates a socket connection and sends the webhook.
+
+"""
 
 
-# actions
-def check_intruder(intruder_signal_value, alarm_state):
-    if intruder_signal_value is True and alarm_state is False:
-        value1 = "alarm activated"
-    elif intruder_signal_value is False and alarm_state is True:
-        value1 = "alarm stopped"
-    else:
-        value1 = None
-    return value1
+class Notifier:
+    def __init__(self):
+        self.signal_is_active = False
+        self.action1 = None
+        self.action2 = None
 
+    def check_signal(self, signal_value):
+        update_signal = signal_value != self.signal_is_active
+        if update_signal is True:
+            if signal_value is True:
+                self.signal_is_active = True
+                return self.trigger_action1()
+            else:
+                self.signal_is_active = False
+                return self.trigger_action2_or_cease()
 
-def check_second_intruder(second_intruder_signal_value, second_intruder_state):
-    if second_intruder_signal_value is True and second_intruder_state is False:
-        value1 = "second intruder detected"
-    elif second_intruder_signal_value is False and second_intruder_state is True:
-        value1 = "second intruder cleared"
-    else:
-        value1 = None
-    return value1
+    def trigger_action1(self):
+        return self.send_webhook(self.action1)
 
+    def trigger_action2_or_cease(self):
+        print("\naction2 = ", self.action2)
+        if self.action2 is None:
+            return self.action1 + " ceased"
 
-def check_set(set_unset_signal_value, set_state):
-    if set_unset_signal_value is True and set_state is False:
-        value1 = "alarm set"
-    elif set_unset_signal_value is False and set_state is True:
-        value1 = "alarm unset"
-    else:
-        value1 = None
-    return value1
+        else:
+            return self.send_webhook(self.action2)
+
+    def create_url(self, action):
+        url = (
+            BASE_URL
+            + "/trigger/"
+            + WEBHOOK_EVENT
+            + "/with/key/"
+            + WEBHOOK_KEY
+            + "?value1="
+            + action
+        )
+        return url
+
+    def send_webhook(self, action):
+        full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
+            self.create_url(action)
+        ).encode()
+        addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
+        s = socket.socket()
+        s.connect(addr)
+        s.send(full_url)
+        # may not need to receive data, check if webhook works without and delete
+        # data = s.recv(1000)
+        s.close()
+        print("webhook sent")
+        return full_url
+
+    def set_action1(self, action):
+        self.action1 = action
+        return self.action1
+
+    def set_action2(self, action):
+        self.action2 = action
+        return self.action2
 
 
 def wifi_connected():
@@ -97,84 +136,33 @@ def wifi_connected():
 
 def wifi_connect():
     wlan = network.WLAN(network.STA_IF)
+    print("turning WiFi on...")
     wlan.active(True)
     if not wlan.isconnected():
-        print("connecting to network...")
-        wlan.connect("SSID", "SSIDPASSWORD")
+        print("connecting to network...", SSID)
+        wlan.connect(SSID, SSID_PASSWORD)
         while not wlan.isconnected():
             pass
+    print("connected to network", SSID)
     print("network config:", wlan.ifconfig())
     wifi_LED.on()
     return wlan
 
 
-def send_webhook(url):
-    full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(url).encode()
-    addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
-    s = socket.socket()
-    s.connect(addr)
-    s.send(full_url)
-    # may not need to receive data, check if webhook works without and delete
-    # data = s.recv(1000)
-    s.close()
-    return True
-
-
-def poll_alarm_signal(intruder_signal_value, alarm_state):
-    sent_webhook = None
-    value1 = check_intruder(intruder_signal_value, alarm_state)
-    if value1 == "alarm activated":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        alarm_state = True
-    elif value1 == "alarm stopped":
-        alarm_state = False
-    return alarm_state, sent_webhook
-
-
-def poll_set_signal(set_unset_signal_value, set_state):
-    value1 = check_set(set_unset_signal_value, set_state)
-    sent_webhook = None
-    if value1 == "alarm set":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        set_state = True
-    elif value1 == "alarm unset":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        set_state = False
-    return set_state, sent_webhook
-
-
-def poll_second_intruder_signal(second_intruder_signal_value, second_intruder_state):
-    value1 = check_second_intruder(second_intruder_signal_value, second_intruder_state)
-    sent_webhook = None
-    if value1 == "second intruder detected":
-        url = create_url(value1)
-        sent_webhook = send_webhook(url)
-        second_intruder_state = True
-    elif value1 == "second intruder cleared":
-        second_intruder_state = False
-    return second_intruder_state, sent_webhook
-
-
-def poll_all_signals():
-    initialise_variables()
-    alarm_state = poll_alarm_signal(intruder_signal_value, alarm_state)[0]
-    set_state = poll_set_signal(set_unset_signal_value, set_state)[0]
-    second_intruder_state = poll_second_intruder_signal(
-        second_intruder_signal_value, second_intruder_state
-    )[0]
-
-
 if __name__ == "__main__":
-    # initialise variables
-    intruder_signal_value = intruder_signal.value()
-    set_unset_signal_value = set_unset_signal.value()
-    second_intruder_signal_value = second_intruder_signal.value()
-    alarm_state = None
-    set_state = None
-    second_intruder_state = None
+    print("Initialising.....")
+    # initialise intruder class
+    intruder = Notifier()
+    intruder.set_action1("intruder detected")
+
+    # initialise second intruder class
+    second_intruder = Notifier()
+    second_intruder.set_action1("second intruder detected")
+
+    # initialise set_unset class
+    set_unset = Notifier()
+    set_unset.set_action1("alarm set")
+    set_unset.set_action2("alarm unset")
 
     # connect to the network
     wifi_connect()
@@ -182,6 +170,9 @@ if __name__ == "__main__":
     # main loop poll all signals if wifi is connected else re-connect network
     while True:
         if wifi_connected:
-            poll_all_signals()
+            intruder.check_signal(intruder_signal)
+            second_intruder.check_signal(second_intruder_signal)
+            set_unset.check_signal(set_unset_signal)
         else:
+            print("Network connection failed, trying to reconnect...")
             wifi_connect()
