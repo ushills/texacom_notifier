@@ -18,14 +18,18 @@
 from machine import Pin, Signal
 import network
 import usocket as socket
+import config
 
-# global variables
-WEBHOOK_KEY = "{{webhook_key}}"
-WEBHOOK_EVENT = "{{webhook_event}}"
-BASE_URL = "https://maker.ifttt.com"
-SSID = "{SSID name}"
-SSID_PASSWORD = "{SSID password}"
+# global variables contained in a seperate config.py file
+WEBHOOK_KEY = config.WEBHOOK_KEY
+WEBHOOK_EVENT = config.WEBHOOK_EVENT
+BASE_URL = config.BASE_URL
+SSID = config.SSID
+SSID_PASSWORD = config.SSID_PASSWORD
+
+# create network class
 wlan = network.WLAN(network.STA_IF)
+
 
 # define inputs
 # INTRUDER_PIN = D1 (GPIO5)
@@ -174,6 +178,7 @@ if __name__ == "__main__":
     wifi_connect()
 
     # main loop poll all signals if wifi is connected else re-connect network
+    print("Running main routing...")
     while True:
         if wifi_connected():
             intruder.check_signal(intruder_signal)
