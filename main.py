@@ -25,6 +25,7 @@ WEBHOOK_EVENT = "{{webhook_event}}"
 BASE_URL = "https://maker.ifttt.com"
 SSID = "{SSID name}"
 SSID_PASSWORD = "{SSID password}"
+wlan = network.WLAN(network.STA_IF)
 
 # define inputs
 # INTRUDER_PIN = D1 (GPIO5)
@@ -132,10 +133,12 @@ class Notifier:
 def wifi_connected():
     if not wlan.isconnected():
         wifi_LED.off()
+        return False
+    else:
+        return True
 
 
 def wifi_connect():
-    wlan = network.WLAN(network.STA_IF)
     print("turning WiFi on...")
     wlan.active(True)
     if not wlan.isconnected():
