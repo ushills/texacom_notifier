@@ -58,7 +58,7 @@ class TestNotifier:
     def test_create_url(self, test_signal):
         assert (
             test_signal.create_url("test+action")
-            == "http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test+action"
+            == "https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test+action"
         )
 
     def test_send_webhook_value(self, test_signal):
