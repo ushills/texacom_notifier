@@ -102,8 +102,7 @@ class Notifier:
 
     def create_url(self, action):
         url = (
-            "http://"
-            + BASE_URL
+            BASE_URL
             + "/trigger/"
             + WEBHOOK_EVENT
             + "/with/key/"
@@ -115,17 +114,21 @@ class Notifier:
 
     def send_webhook(self, action):
         print("Sending webhook for...", action)
-        full_url = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(
-            self.create_url(action)
-        ).encode()
+        url = self.create_url(action)
+        _, _, host, path = url.split("/", 3)
+        full_url = "GET /{} HTTP/1.1\r\nHost: {}\r\n\r\n".format(path, host).encode()
         addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
         print("Establishing socket connection...")
         s = socket.socket()
         s.connect(addr)
         print("Sending webhook...")
         s.send(full_url)
-        # may not need to receive data, check if webhook works without and delete
-        # data = s.recv(1000)
+        # while True:
+        #     data = s.recv(100)
+        #     if data:
+        #         print(str(data, "utf8"), end="")
+        #     else:
+        #         break
         s.close()
         print("Webhook sent")
         return full_url
@@ -165,22 +168,22 @@ if __name__ == "__main__":
     print("Initialising.....")
     # initialise intruder class
     intruder = Notifier()
-    intruder.set_action1("intruder detected")
+    intruder.set_action1("intruder+detected")
 
     # initialise second intruder class
     second_intruder = Notifier()
-    second_intruder.set_action1("second intruder detected")
+    second_intruder.set_action1("second+intruder+detected")
 
     # initialise set_unset class
     set_unset = Notifier()
-    set_unset.set_action1("alarm set")
-    set_unset.set_action2("alarm unset")
+    set_unset.set_action1("alarm+set")
+    set_unset.set_action2("alarm+unset")
 
     # connect to the network
     wifi_connect()
 
     # main loop poll all signals if wifi is connected else re-connect network
-    print("Running main routing...")
+    print("Running main routine...")
     while True:
         if wifi_connected():
             intruder.check_signal(intruder_signal)
