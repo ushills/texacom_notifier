@@ -117,7 +117,7 @@ class Notifier:
         url = self.create_url(action)
         _, _, host, path = url.split("/", 3)
         full_url = "GET /{} HTTP/1.1\r\nHost: {}\r\n\r\n".format(path, host).encode()
-        addr = socket.getaddrinfo(host, 443)[0][-1]
+        addr = socket.getaddrinfo(host, 80)[0][-1]
         print("Establishing socket connection...")
         s = socket.socket()
         s.connect(addr)
@@ -186,9 +186,9 @@ if __name__ == "__main__":
     print("Running main routine...")
     while True:
         if wifi_connected():
-            intruder.check_signal(intruder_signal)
-            second_intruder.check_signal(second_intruder_signal)
-            set_unset.check_signal(set_unset_signal)
+            intruder.check_signal(intruder_signal.value())
+            second_intruder.check_signal(second_intruder_signal.value())
+            set_unset.check_signal(set_unset_signal.value())
         else:
             print("Network connection failed, trying to reconnect...")
             wifi_connect()

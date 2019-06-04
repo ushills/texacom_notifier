@@ -58,7 +58,7 @@ class TestNotifier:
     def test_create_url(self, test_signal):
         assert (
             test_signal.create_url("test+action")
-            == "https://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test+action"
+            == "http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test+action"
         )
 
     def test_send_webhook_value(self, test_signal):
@@ -80,9 +80,7 @@ class TestNotifier:
         # send second test_signal signal
         assert test_signal.check_signal(True) is None
 
-    def test_sigal_deactivation_sends_ceased_response(
-        self, test_signal, set_signal_true
-    ):
+    def test_sigal_deactivation_sends_ceased_response(self, test_signal, set_signal_true):
         assert test_signal.check_signal(False) == "signal+activated ceased"
 
     def test_signal_deactivation_sends_action2_response_when_action2_exists(
