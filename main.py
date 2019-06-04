@@ -117,7 +117,7 @@ class Notifier:
         url = self.create_url(action)
         _, _, host, path = url.split("/", 3)
         full_url = "GET /{} HTTP/1.1\r\nHost: {}\r\n\r\n".format(path, host).encode()
-        addr = socket.getaddrinfo(BASE_URL, 80)[0][-1]
+        addr = socket.getaddrinfo(host, 443)[0][-1]
         print("Establishing socket connection...")
         s = socket.socket()
         s.connect(addr)
