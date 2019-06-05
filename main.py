@@ -79,6 +79,10 @@ class Notifier:
         self.action2 = None
 
     def check_signal(self, signal_value):
+        if signal_value == 1:
+            signal_value = True
+        else:
+            signal_value = False
         update_signal = signal_value != self.signal_is_active
         if update_signal is True:
             if signal_value is True:
