@@ -14,12 +14,8 @@ mock_usocket = MagicMock()
 sys.modules["usocket"] = mock_usocket
 
 from main import Notifier
-import main
 
-
-"""create an instance of Notifier 
-   called fake_signal as a base for testing
-"""
+# import main
 
 
 class TestNotifier:
@@ -93,4 +89,3 @@ class TestNotifier:
             fake_signal.check_signal(False)
             == b"GET /trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal+unactivated HTTP/1.1\r\nHost: maker.ifttt.com\r\n\r\n"
         )
-
