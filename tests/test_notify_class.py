@@ -57,16 +57,21 @@ class TestNotifier:
             == "http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test+action"
         )
 
-    def test_send_webhook_value(self, fake_signal):
-        assert (
+    def test_send_webhook_value_with_patch_context(self, fake_signal):
+        with patch.object(Notifier, "send_webhook"):
+            # fake_signal = Notifier()
             fake_signal.send_webhook("test+action")
-            == b"GET /trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test+action HTTP/1.1\r\nHost: maker.ifttt.com\r\n\r\n"
-        )
+            fake_signal.send_webhook.assert_called_with("test+action")
+
+    @patch.object(Notifier, "send_webhook")
+    def test_send_webhook_value_with_patch_decorator(self, fake_signal):
+        fake_signal.send_webhook("test+action")
+        fake_signal.send_webhook.assert_called_with("test+action")
 
     def test_send_webhook_type(self, fake_signal):
         assert type(fake_signal.send_webhook("test+action")) == bytes
 
-    def test_first_signal_sends_webhook(self, fake_signal, set_action1):
+    def test_first_signal_sends_webhook(self, fake_signal):
         assert (
             fake_signal.check_signal(1)
             == b"GET /trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal+activated HTTP/1.1\r\nHost: maker.ifttt.com\r\n\r\n"

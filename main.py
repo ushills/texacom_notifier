@@ -127,12 +127,12 @@ class Notifier:
         s.connect(addr)
         print("Sending webhook...")
         s.send(full_url)
-        while True:
-            data = s.recv(100)
-            if data:
-                print(str(data, "utf8"), end="")
-            else:
-                break
+        # while True:
+        #     data = s.recv(100)
+        #     if data:
+        #         print(str(data, "utf8"), end="")
+        #     else:
+        #         break
         s.close()
         print("Webhook sent")
         return full_url
