@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
 import sys
 
 # mock Signal and Pin from Micropython and not installed
