@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
 import sys
 
 # mock Signal and Pin from Micropython and not installed
@@ -15,29 +15,43 @@ sys.modules["usocket"] = mock_usocket
 
 from main import Notifier
 
-# import main
+
+def mock_send_webhook(self, action):
+    print("mocking send_webhook")
+    url = (
+        "http://maker.ifttt.com/trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1="
+        + action
+    )
+    _, _, host, path = url.split("/", 3)
+    full_url = "GET /{} HTTP/1.1\r\nHost: {}\r\n\r\n".format(path, host).encode()
+    return full_url
 
 
+@patch.object(Notifier, "send_webhook", mock_send_webhook)
 class TestNotifier:
     @pytest.fixture(scope="class")
     def fake_signal(self):
         return Notifier()
 
     @pytest.fixture(scope="class")
+    @patch.object(Notifier, "send_webhook", mock_send_webhook)
     def set_action1(self, fake_signal):
         fake_signal.set_action1("signal+activated")
         assert fake_signal.action1 == "signal+activated"
 
     @pytest.fixture(scope="class")
+    @patch.object(Notifier, "send_webhook", mock_send_webhook)
     def set_action2(self, fake_signal):
         fake_signal.set_action2("signal+unactivated")
         assert fake_signal.action2 == "signal+unactivated"
 
     @pytest.fixture(scope="class")
+    @patch.object(Notifier, "send_webhook", mock_send_webhook)
     def set_signal_true(self, fake_signal):
         fake_signal.check_signal(1)
 
     @pytest.fixture(scope="class")
+    @patch.object(Notifier, "send_webhook", mock_send_webhook)
     def set_signal_false(self, fake_signal):
         fake_signal.check_signal(0)
 
@@ -59,14 +73,14 @@ class TestNotifier:
 
     def test_send_webhook_value(self, fake_signal):
         assert (
-            fake_signal.send_webhook("test+action")
-            == b"GET /trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=test+action HTTP/1.1\r\nHost: maker.ifttt.com\r\n\r\n"
+            fake_signal.send_webhook(fake_signal.action1)
+            == b"GET /trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal+activated HTTP/1.1\r\nHost: maker.ifttt.com\r\n\r\n"
         )
 
     def test_send_webhook_type(self, fake_signal):
         assert type(fake_signal.send_webhook("test+action")) == bytes
 
-    def test_first_signal_sends_webhook(self, fake_signal, set_action1):
+    def test_first_signal_sends_webhook(self, fake_signal):
         assert (
             fake_signal.check_signal(1)
             == b"GET /trigger/{{webhook_event}}/with/key/{{webhook_key}}?value1=signal+activated HTTP/1.1\r\nHost: maker.ifttt.com\r\n\r\n"
