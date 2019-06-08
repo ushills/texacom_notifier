@@ -18,6 +18,7 @@
 from machine import Pin, Signal
 import network
 import usocket as socket
+import time
 import config
 
 # global variables contained in a seperate config.py file
@@ -134,6 +135,7 @@ class Notifier:
             else:
                 break
         s.close()
+        time.sleep(10)
         print("Webhook sent")
         return full_url
 
@@ -180,8 +182,8 @@ if __name__ == "__main__":
 
     # initialise set_unset class
     set_unset = Notifier()
-    set_unset.set_action1("alarm+set")
-    set_unset.set_action2("alarm+unset")
+    set_unset.set_action1("alarm+unset")
+    set_unset.set_action2("alarm+set")
 
     # connect to the network
     wifi_connect()
