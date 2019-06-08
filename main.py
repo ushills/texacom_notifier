@@ -174,16 +174,16 @@ if __name__ == "__main__":
     print("Initialising.....")
     # initialise intruder class
     intruder = Notifier()
-    intruder.set_action1("intruder+detected")
+    intruder.set_action1("INTRUDER+DETECTED")
 
     # initialise second intruder class
     second_intruder = Notifier()
-    second_intruder.set_action1("second+intruder+detected")
+    second_intruder.set_action1("SECOND+INTRUDER+DETECTED")
 
     # initialise set_unset class
     set_unset = Notifier()
-    set_unset.set_action1("alarm+unset")
-    set_unset.set_action2("alarm+set")
+    set_unset.set_action1("Alarm+unset")
+    set_unset.set_action2("Alarm+set")
 
     # connect to the network
     wifi_connect()
