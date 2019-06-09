@@ -182,8 +182,8 @@ if __name__ == "__main__":
 
     # initialise set_unset class
     set_unset = Notifier()
-    set_unset.set_action1("Alarm+unset")
-    set_unset.set_action2("Alarm+set")
+    set_unset.set_action1("Alarm+set")
+    set_unset.set_action2("Alarm+unset")
 
     # connect to the network
     wifi_connect()
