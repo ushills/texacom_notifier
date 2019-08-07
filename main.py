@@ -15,7 +15,7 @@
 # Pins are high by default and therefore a value of 0 indicates
 # an alarm state
 
-from machine import Pin, Signal
+from machine import Pin, Signal, WDT
 import network
 import usocket as socket
 import time
@@ -170,6 +170,12 @@ def wifi_connect():
     return wlan
 
 
+# def check_network_connection():
+# tim = Timer(-1)
+# tim.init(period=5000, mode=Timer.ONE_SHOT, callback=lambda t:print(1))
+# tim.init(period=2000, mode=Timer.PERIODIC, callback=lambda t:print(2))
+
+
 if __name__ == "__main__":
     print("Initialising.....")
     # initialise intruder class
@@ -185,12 +191,16 @@ if __name__ == "__main__":
     set_unset.set_action1("Alarm+set")
     set_unset.set_action2("Alarm+unset")
 
+    # set watchdog timer
+    wdt = WDT(timeout=10000)  # timeout of 10s
+
     # connect to the network
     wifi_connect()
 
     # main loop poll all signals if wifi is connected else re-connect network
     print("Running main routine...")
     while True:
+        wdt.feed()
         if wifi_connected():
             intruder.check_signal(intruder_signal.value())
             second_intruder.check_signal(second_intruder_signal.value())
