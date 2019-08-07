@@ -188,6 +188,9 @@ if __name__ == "__main__":
     # connect to the network
     wifi_connect()
 
+    # pause for 10 seconds to prevent multiple reboots
+    time.sleep(10)
+
     # main loop poll all signals if wifi is connected else re-connect network
     print("Running main routine...")
     while True:
