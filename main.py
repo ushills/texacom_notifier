@@ -196,5 +196,4 @@ if __name__ == "__main__":
             second_intruder.check_signal(second_intruder_signal.value())
             set_unset.check_signal(set_unset_signal.value())
         else:
-            print("Network connection failed, trying to reconnect...")
-            wifi_connect()
+            machine.reset()
