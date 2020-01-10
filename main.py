@@ -118,6 +118,8 @@ class Notifier:
         return url
 
     def send_webhook(self, action):
+        if not wlan.isconnected():
+            wifi_connect()
         print("Sending webhook for...", action)
         url = self.create_url(action)
         _, _, host, path = url.split("/", 3)
@@ -191,12 +193,9 @@ if __name__ == "__main__":
     # pause for 10 seconds to prevent multiple reboots
     time.sleep(10)
 
-    # main loop poll all signals if wifi is connected else re-connect network
+    # main loop
     print("Running main routine...")
     while True:
-        if wifi_connected():
-            intruder.check_signal(intruder_signal.value())
-            second_intruder.check_signal(second_intruder_signal.value())
-            set_unset.check_signal(set_unset_signal.value())
-        else:
-            machine.reset()
+        intruder.check_signal(intruder_signal.value())
+        second_intruder.check_signal(second_intruder_signal.value())
+        set_unset.check_signal(set_unset_signal.value())
