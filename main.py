@@ -15,7 +15,7 @@
 # Pins are high by default and therefore a value of 0 indicates
 # an alarm state
 
-from machine import Pin, Signal
+from machine import Pin, Signal, reset
 import network
 import usocket as socket
 import time
@@ -199,3 +199,6 @@ if __name__ == "__main__":
         intruder.check_signal(intruder_signal.value())
         second_intruder.check_signal(second_intruder_signal.value())
         set_unset.check_signal(set_unset_signal.value())
+        if not wlan.isconnected():
+            time.sleep(10)
+            reset()
