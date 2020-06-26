@@ -1,4 +1,4 @@
-# ESP8622/NodeMCU notifier for Texacom Communicator Interface
+# ESP8266/NodeMCU notifier for Texacom Communicator Interface
 
 Code for Texecom Veritas Alarm communicator inteface
 using esp8266 - Nodemcu Development Kit to send alarm
