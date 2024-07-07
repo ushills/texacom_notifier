@@ -34,11 +34,11 @@ wlan = network.WLAN(network.STA_IF)
 
 # define inputs
 # INTRUDER_PIN = D1 (GPIO5)
-INTRUDER_PIN = Pin(5, Pin.IN, Pin.PULL_UP)
+INTRUDER_PIN = Pin(12, Pin.IN, Pin.PULL_UP)
 # SET_UNSET_PIN = D2 (GPIO4)
-SET_UNSET_PIN = Pin(4, Pin.IN, Pin.PULL_UP)
+SET_UNSET_PIN = Pin(13, Pin.IN, Pin.PULL_UP)
 # SECOND_INTRUDER_PIN = D4 (GPIO2)
-SECOND_INTRUDER_PIN = Pin(2, Pin.IN, Pin.PULL_UP)
+SECOND_INTRUDER_PIN = Pin(14, Pin.IN, Pin.PULL_UP)
 
 # define outputs
 # esp LED
